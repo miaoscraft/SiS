@@ -1,20 +1,50 @@
 package main
 
-import "github.com/Tnze/CoolQ-Golang-SDK/cqp"
+import (
+	"fmt"
+	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
+	"github.com/miaoscraft/SiS/data"
+	"github.com/miaoscraft/SiS/syntax"
+)
 
 //go:generate cqcfg .
-// cqp: 名称: GoDemo
-// cqp: 版本: 1.0.0:2
+// cqp: 名称: SiS
+// cqp: 版本: 1.0.0:1
 // cqp: 作者: Tnze
-// cqp: 简介: 一个超棒的Go语言插件Demo，它会回复你的私聊消息~
-func main() { /*此处应当留空*/ }
+// cqp: 简介: Minecraft服务器综合管理器
+func main() { /*空*/ }
 
 func init() {
-	cqp.AppID = "me.cqp.tnze.demo" // TODO: 修改为这个插件的ID
-	cqp.PrivateMsg = onPrivateMsg
+	cqp.AppID = "cn.miaoscraft.sis"
+	cqp.Enable = onEnable
+	cqp.GroupMsg = onGroupMsg
+
 }
 
-func onPrivateMsg(subType, msgID int32, fromQQ int64, msg string, font int32) int32 {
-	cqp.SendPrivateMsg(fromQQ, msg) //复读机
+func onEnable() int32 {
+	// 连接数据源
+	err := data.Init()
+	if err != nil {
+		cqp.AddLog(cqp.Error, "init", fmt.Sprintf("初始化数据源失败: %v", err))
+	}
+
+	// 将登录账号载入命令解析器（用于识别@）
+	syntax.CmdPrefix = fmt.Sprintf("[CQ:at,qq=%d]", cqp.GetLoginQQ())
+
+	return 0
+}
+
+func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, msg string, font int32) int32 {
+	switch fromGroup {
+	case data.Config.AdminID:
+		// 当前版本，管理群和游戏群收到的命令不做区分
+		fallthrough
+
+	case data.Config.GroupID:
+		syntax.GroupMsg(msg,
+			func(resp string) { //callback
+				cqp.SendGroupMsg(fromGroup, resp)
+			})
+	}
 	return 0
 }
