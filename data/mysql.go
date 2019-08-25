@@ -21,12 +21,15 @@ func openDB(addr, user, pswd string) (err error) {
 drop procedure if exists SeizeUUID;
 create procedure SeizeUUID(in MyQQ bigint, in MyName text, in MyUUID binary(16))
 begin
+    declare oldName text;
+    select Name into oldName from whitelist_test where QQ = MyQQ;
+
     insert ignore into whitelist_test
         (QQ, Name, UUID)
     values (MyQQ, MyName, MyUUID)
     on duplicate key update Name=MyName, UUID=MyUUID;
 
-    select QQ
+    select QQ, oldName
     from whitelist_test
     where UUID = MyUUID;
 end;
