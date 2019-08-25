@@ -41,7 +41,7 @@ func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, ms
 		fallthrough
 
 	case data.Config.GroupID:
-		syntax.GroupMsg(msg,
+		syntax.GroupMsg(fromQQ, msg,
 			func(resp string) { //callback
 				cqp.SendGroupMsg(fromGroup, resp)
 			})
