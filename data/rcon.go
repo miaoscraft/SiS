@@ -22,7 +22,7 @@ func rconCommand(cmd string) (string, error) {
 ReTry:
 	err := rcon.Cmd(cmd)
 	if err != nil {
-		cqp.AddLog(cqp.Error, "rcon", "rcon添加白名单失败: "+err.Error())
+		cqp.AddLog(cqp.Error, "RCON", "rcon添加白名单失败: "+err.Error())
 		// 断线重连
 		err = reopenRCON()
 		if err != nil {
@@ -33,12 +33,12 @@ ReTry:
 
 	resp, err := rcon.Resp()
 	if err != nil {
-		cqp.AddLog(cqp.Error, "rcon", "读rcon返回值失败: "+err.Error())
+		cqp.AddLog(cqp.Error, "RCON", "读rcon返回值失败: "+err.Error())
 		// 不重连
 		return "", err
 	}
 
-	cqp.AddLog(cqp.Info, "rcon", "RCON: "+resp)
+	cqp.AddLog(cqp.Info, "RCON", "RCON: "+resp)
 	return resp, nil
 }
 

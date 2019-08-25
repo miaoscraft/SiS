@@ -16,7 +16,12 @@ func Init() error {
 	}
 
 	// 连接数据库
-	err = openDB(Config.Database.Address, Config.Database.User, Config.Database.Password)
+	err = openDB(
+		Config.Database.Address,
+		Config.Database.User,
+		Config.Database.Password,
+		Config.Database.Schema,
+	)
 	if err != nil {
 		return fmt.Errorf("连接数据库出错: %v", err)
 	}
@@ -45,6 +50,7 @@ var Config struct {
 		Address  string
 		User     string
 		Password string
+		Schema   string
 	}
 }
 
@@ -56,7 +62,7 @@ func readConfig() error {
 
 	// 检查配置文件是否有多余数据，抛警告⚠️
 	if uk := md.Undecoded(); len(uk) > 0 {
-		cqp.AddLog(cqp.Warning, "conf", fmt.Sprintf("配置文件中有未知数据: %q", uk))
+		cqp.AddLog(cqp.Warning, "Conf", fmt.Sprintf("配置文件中有未知数据: %q", uk))
 	}
 
 	return nil

@@ -12,22 +12,22 @@ import (
 func MyID(qq int64, name string, ret func(msg string)) {
 	name, id, err := getUUID(name)
 	if err != nil {
-		cqp.AddLog(cqp.Error, "myid", fmt.Sprintf("向Mojang查询玩家UUID失败: %v", err))
+		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家UUID失败: %v", err))
 	}
 
 	owner, oldName, err := data.SetWhitelist(qq, name, id)
 	if err != nil {
-		cqp.AddLog(cqp.Error, "myid", fmt.Sprintf("数据库操作失败: %v", err))
+		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("数据库操作失败: %v", err))
 	}
 
 	if owner != qq {
 		ret(fmt.Sprintf("账号%q当前被[CQ:at,qq=%d]占有", name, owner))
 	} else {
 		// 删除旧的白名单
-		if oldName != "" {
-			err := data.RemoveWhitelist(oldName)
+		if oldName != nil {
+			err := data.RemoveWhitelist(*oldName)
 			if err != nil {
-				ret(fmt.Sprintf("消除白名单%s失败: %v", oldName, err))
+				ret(fmt.Sprintf("消除白名单%s失败: %v", *oldName, err))
 				return
 			}
 		}
@@ -35,7 +35,7 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		// 添加白名单
 		err := data.AddWhitelist(name)
 		if err != nil {
-			ret(fmt.Sprintf("添加白名单%s失败: %v", oldName, err))
+			ret(fmt.Sprintf("添加白名单%s失败: %v", *oldName, err))
 			return
 		}
 
