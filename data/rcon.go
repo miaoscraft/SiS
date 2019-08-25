@@ -48,6 +48,6 @@ func AddWhitelist(name string) error {
 }
 
 func RemoveWhitelist(name string) error {
-	_, err := rconCommand("whitelist add " + name)
+	_, err := rconCommand("whitelist remove " + name)
 	return err
 }

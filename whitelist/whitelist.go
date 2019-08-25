@@ -20,6 +20,7 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("数据库操作失败: %v", err))
 	}
 
+	// 若owner是当前处理的用户则说明绑定成功，否则就是失败
 	if owner != qq {
 		ret(fmt.Sprintf("账号%q当前被[CQ:at,qq=%d]占有", name, owner))
 	} else {
@@ -47,12 +48,23 @@ func MyID(qq int64, name string, ret func(msg string)) {
 func getUUID(name string) (string, uuid.UUID, error) {
 	var id uuid.UUID
 
-	resp, err := http.Get("https://api.mojang.com/users/profiles/minecraft/" + name)
+	// 构造请求
+	request, err := http.NewRequest("GET", "https://api.mojang.com/users/profiles/minecraft/"+name, nil)
+	if err != nil {
+		return name, id, err
+	}
+
+	// Golang默认的User-agent被屏蔽了
+	request.Header.Set("User-agent", "SiS")
+
+	// 发送Get请求
+	resp, err := http.Client{}.Do(request)
 	if err != nil {
 		return name, id, err
 	}
 	defer resp.Body.Close()
 
+	// 解析json返回值
 	err = json.NewDecoder(resp.Body).Decode(&struct {
 		Name *string
 		ID   *uuid.UUID
@@ -61,6 +73,7 @@ func getUUID(name string) (string, uuid.UUID, error) {
 		return name, id, err
 	}
 
+	// 检查返回码
 	if resp.StatusCode != 200 {
 		err = fmt.Errorf("服务器状态码非200: %v", resp.Status)
 	}
