@@ -13,11 +13,13 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	name, id, err := getUUID(name)
 	if err != nil {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家UUID失败: %v", err))
+		return
 	}
 
 	owner, oldName, err := data.SetWhitelist(qq, name, id)
 	if err != nil {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("数据库操作失败: %v", err))
+		return
 	}
 
 	// 若owner是当前处理的用户则说明绑定成功，否则就是失败
@@ -58,7 +60,7 @@ func getUUID(name string) (string, uuid.UUID, error) {
 	request.Header.Set("User-agent", "SiS")
 
 	// 发送Get请求
-	resp, err := http.Client{}.Do(request)
+	resp, err := new(http.Client).Do(request)
 	if err != nil {
 		return name, id, err
 	}
