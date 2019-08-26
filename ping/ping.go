@@ -19,10 +19,10 @@ func Ping(args []string, ret func(msg string)) bool {
 		delay time.Duration
 		err   error
 	)
-	if data.Config.Ping.Timeout.Duration > 0 {
+	if d := data.Config.Ping.Timeout.Duration; d > 0 {
 		//启用Timeout
 		addr, port := getAddr(args)
-		resp, delay, err = bot.PingAndListTimeout(addr, port, 0)
+		resp, delay, err = bot.PingAndListTimeout(addr, port, d)
 	} else {
 		//禁用Timeout
 		resp, delay, err = bot.PingAndList(getAddr(args))
