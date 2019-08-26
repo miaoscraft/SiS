@@ -1,6 +1,7 @@
 package syntax
 
 import (
+	"github.com/miaoscraft/SiS/ping"
 	"github.com/miaoscraft/SiS/whitelist"
 	"regexp"
 	"strings"
@@ -18,8 +19,12 @@ var expMyID = regexp.MustCompile(`(?i)MyID\s*[=＝]\s*([[:word:]]{3,16})`)
 func GroupMsg(from int64, msg string, ret func(msg string)) bool {
 	// 识别@指令
 	if strings.HasPrefix(msg, CmdPrefix) {
-
-		return true
+		cmd := msg[len(CmdPrefix):]
+		args := strings.Fields(cmd)
+		switch {
+		case len(args) > 1 && args[0] == "ping":
+			return ping.Ping(args, ret)
+		}
 	}
 
 	// 识别MyID指令

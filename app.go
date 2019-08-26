@@ -10,7 +10,7 @@ import (
 
 //go:generate cqcfg .
 // cqp: 名称: SiS
-// cqp: 版本: 1.0.0:3
+// cqp: 版本: 1.0.0:4
 // cqp: 作者: Tnze
 // cqp: 简介: Minecraft服务器综合管理器
 func main() { /*空*/ }
@@ -25,6 +25,8 @@ func init() {
 
 // 插件启用事件
 func onEnable() int32 {
+	defer panicer()
+
 	// 连接数据源
 	err := data.Init()
 	if err != nil {
@@ -39,6 +41,8 @@ func onEnable() int32 {
 
 // 群消息事件
 func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, msg string, font int32) int32 {
+	defer panicer()
+
 	if fromQQ == 80000000 { //匿名
 		return Ignore
 	}
@@ -62,6 +66,8 @@ func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, ms
 
 // 群成员减少事件
 func onGroupMemberDecrease(subType, sendTime int32, fromGroup, fromQQ, beingOperateQQ int64) int32 {
+	defer panicer()
+
 	retValue := Ignore
 	ret := func(resp string) {
 		cqp.SendGroupMsg(fromGroup, resp)
@@ -78,3 +84,9 @@ const (
 	Ignore    int32 = 0 //忽略消息
 	Intercept       = 1 //拦截消息
 )
+
+func panicer() {
+	if v := recover(); v != nil {
+		cqp.AddLog(cqp.Fatal, "Main", fmt.Sprint(v))
+	}
+}

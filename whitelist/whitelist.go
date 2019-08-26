@@ -17,6 +17,7 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	name, id, err := getUUID(name)
 	if err != nil {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家UUID失败: %v", err))
+		ret("无法查询到玩家的UUID")
 		return
 	}
 
@@ -24,6 +25,7 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	owner, oldName, err := data.SetWhitelist(qq, name, id)
 	if err != nil {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("数据库操作失败: %v", err))
+		ret("无法访问到数据库")
 		return
 	}
 
