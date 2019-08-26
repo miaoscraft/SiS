@@ -26,26 +26,26 @@ func openDB(addr, user, pswd, schema string) (err error) {
 
 // 初始化数据库，自动检查表是否完整，重载储存过程
 func initDB(schema string) error {
-	// 建库
-	if _, err := db.Exec(`create database if not exists ? character set UTF8;`, schema); err != nil {
-		return err
-	}
+	// 不建库
+	//if _, err := db.Exec(`create database if not exists ` + schema + ` character set UTF8;`); err != nil {
+	//	return err
+	//}
 
 	// 建表
 	if _, err := db.Exec(`
-create table table_name
+create table if not exists players
 (
 	QQ bigint null,
 	Name text null,
 	UUID binary(16) null,
-	constraint table_name_pk
+	constraint players
 		primary key (QQ)
 );
 `); err != nil {
 		return err
 	}
 
-	if _, err := db.Exec(`create unique index table_name_UUID_uindex on players (UUID);`); err != nil {
+	if _, err := db.Exec(`create unique index players_UUID_uindex on players (UUID);`); err != nil {
 		return err
 	}
 
