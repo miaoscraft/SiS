@@ -17,8 +17,15 @@ func openDB(addr, user, pswd, schema string) (err error) {
 		return err
 	}
 
-	if err := initDB(schema); err != nil {
-		return err
+	rows, err := db.Query("select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA=? and TABLE_NAME=?", schema, "players")
+	if err != nil {
+		return fmt.Errorf("查询数据库结构失败: %v", err)
+	}
+	if !rows.Next() {
+		// 若players表还不存在，则认为整个数据库都还没初始化好，然后进行完整的初始化操作
+		if err := initDB(schema); err != nil {
+			return fmt.Errorf("建表失败: %v", err)
+		}
 	}
 
 	return nil
@@ -26,11 +33,6 @@ func openDB(addr, user, pswd, schema string) (err error) {
 
 // 初始化数据库，自动检查表是否完整，重载储存过程
 func initDB(schema string) error {
-	// 不建库
-	//if _, err := db.Exec(`create database if not exists ` + schema + ` character set UTF8;`); err != nil {
-	//	return err
-	//}
-
 	// 建表
 	if _, err := db.Exec(`
 create table if not exists players
