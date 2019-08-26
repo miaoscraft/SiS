@@ -16,8 +16,11 @@ GroupID = 123456789
 # 管理群群号（可选）
 AdminID = 123456789
 
-# Ping工具默认地址
-PingDefaultServer = "play.miaoscraft.cn"
+# Ping工具配置
+[Ping]
+DefaultServer = "play.miaoscraft.cn"
+# 超时设置，为0时禁用
+Timeout = "60s"
 
 # RCON配置
 [RCON]

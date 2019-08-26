@@ -5,6 +5,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 	"path/filepath"
+	"time"
 )
 
 // Init 初始化插件的数据源，包括读取配置文件、建立数据库连接
@@ -45,8 +46,11 @@ var Config struct {
 		Address  string
 		Password string
 	}
-	// Ping工具默认地址
-	PingDefaultServer string
+	// Ping工具配置
+	Ping struct {
+		DefaultServer string
+		Timeout       duration
+	}
 	// MySQL数据库
 	Database struct {
 		Address  string
@@ -54,6 +58,16 @@ var Config struct {
 		Password string
 		Schema   string
 	}
+}
+
+type duration struct {
+	time.Duration
+}
+
+func (d *duration) UnmarshalText(text []byte) error {
+	var err error
+	d.Duration, err = time.ParseDuration(string(text))
+	return err
 }
 
 func readConfig() error {

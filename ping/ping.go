@@ -14,7 +14,19 @@ import (
 )
 
 func Ping(args []string, ret func(msg string)) bool {
-	resp, delay, err := bot.PingAndList(getAddr(args))
+	var (
+		resp  []byte
+		delay time.Duration
+		err   error
+	)
+	if data.Config.Ping.Timeout.Duration > 0 {
+		//启用Timeout
+		addr, port := getAddr(args)
+		resp, delay, err = bot.PingAndListTimeout(addr, port, 0)
+	} else {
+		//禁用Timeout
+		resp, delay, err = bot.PingAndList(getAddr(args))
+	}
 	if err != nil {
 		ret(fmt.Sprintf("请求失败: %v", err))
 		return true
@@ -42,7 +54,7 @@ func Ping(args []string, ret func(msg string)) bool {
 func getAddr(args []string) (addr string, port int) {
 	args = args[1:] //去除第一个元素"ping"
 	// 默认值
-	addr = data.Config.PingDefaultServer
+	addr = data.Config.Ping.DefaultServer
 	port = 25565
 
 	// 在第二个参数内寻找端口
