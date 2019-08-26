@@ -7,6 +7,31 @@
 - 支持分离游戏群与管理群，两个群都能执行命令
 - 所有命令都支持权限管理，为每个管理员和命令设置权限（敬请期待）
 
+## 配置文件
+conf.toml文件为配置文件
+```toml
+# 游戏群群号
+GroupID = 123456789
+
+# 管理群群号（可选）
+AdminID = 123456789
+
+# Ping工具默认地址
+PingDefaultServer = "play.miaoscraft.cn"
+
+# RCON配置
+[RCON]
+Address = "127.0.0.1"
+Password = "your_password"
+
+# 数据库配置
+[Database]
+Address = "127.0.0.1"
+User = "your_mysql_username"
+Password = "your_mysql_password"
+Schema = "数据库库名"
+```
+
 ## 数据接口
 数据库暂仅支持MySQL，计划支持SQLite。  
 支持`toml`配置文件格式，通俗易懂类似`.ini`。  

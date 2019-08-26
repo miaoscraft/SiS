@@ -45,6 +45,8 @@ var Config struct {
 		Address  string
 		Password string
 	}
+	// Ping工具默认地址
+	PingDefaultServer string
 	// MySQL数据库
 	Database struct {
 		Address  string
