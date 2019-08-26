@@ -5,6 +5,7 @@ import (
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 	"github.com/miaoscraft/SiS/data"
 	"github.com/miaoscraft/SiS/syntax"
+	"github.com/miaoscraft/SiS/whitelist"
 )
 
 //go:generate cqcfg .
@@ -18,9 +19,11 @@ func init() {
 	cqp.AppID = "cn.miaoscraft.sis"
 	cqp.Enable = onEnable
 	cqp.GroupMsg = onGroupMsg
+	cqp.GroupMemberDecrease = onGroupMemberDecrease
 
 }
 
+// 插件启用事件
 func onEnable() int32 {
 	// 连接数据源
 	err := data.Init()
@@ -34,17 +37,42 @@ func onEnable() int32 {
 	return 0
 }
 
+// 群消息事件
 func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, msg string, font int32) int32 {
+	if fromQQ == 80000000 { //匿名
+		return Ignore
+	}
+
+	ret := func(resp string) {
+		cqp.SendGroupMsg(fromGroup, resp)
+	}
+
 	switch fromGroup {
 	case data.Config.AdminID:
 		// 当前版本，管理群和游戏群收到的命令不做区分
 		fallthrough
 
 	case data.Config.GroupID:
-		syntax.GroupMsg(fromQQ, msg,
-			func(resp string) { //callback
-				cqp.SendGroupMsg(fromGroup, resp)
-			})
+		if syntax.GroupMsg(fromQQ, msg, ret) {
+			return Intercept
+		}
 	}
-	return 0
+	return Ignore
 }
+
+// 群成员减少事件
+func onGroupMemberDecrease(subType, sendTime int32, fromGroup, fromQQ, beingOperateQQ int64) int32 {
+	retValue := Ignore
+	ret := func(resp string) {
+		cqp.SendGroupMsg(fromGroup, resp)
+		retValue = Intercept
+	}
+
+	whitelist.RemoveWhitelist(fromQQ, ret)
+	return retValue
+}
+
+const (
+	Ignore    int32 = 0 //忽略消息
+	Intercept       = 1 //拦截消息
+)

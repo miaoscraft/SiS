@@ -58,3 +58,28 @@ func SetWhitelist(QQ int64, name string, ID uuid.UUID) (int64, *string, error) {
 
 	return 0, nil, errors.New("数据库没有返回数据")
 }
+
+// UnsetWhitelist 从数据库获取玩家绑定的ID，返回UUID并删除记录
+func UnsetWhitelist(QQ int64) (uuid.UUID, bool, error) {
+	rows, err := db.Query("select UUID from players where QQ=?", QQ)
+	if err != nil {
+		return uuid.Nil, false, err
+	}
+	// 先读数据
+	var UUID uuid.UUID
+	if rows.Next() {
+		err = rows.Scan(&UUID)
+		if err != nil {
+			return uuid.Nil, false, err
+		}
+	}
+
+	// 然后删除
+	_, err = db.Exec("delete from players where QQ=?", QQ)
+	if err != nil {
+		return uuid.Nil, false, err
+	}
+
+	//返回的是读出来的数据
+	return UUID, true, nil
+}

@@ -42,11 +42,13 @@ ReTry:
 	return resp, nil
 }
 
+// AddWhitelist 从游戏服务器添加白名单
 func AddWhitelist(name string) error {
 	_, err := rconCommand("whitelist add " + name)
 	return err
 }
 
+// RemoveWhitelist 从游戏服务器删除白名单
 func RemoveWhitelist(name string) error {
 	_, err := rconCommand("whitelist remove " + name)
 	return err
