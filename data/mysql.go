@@ -17,10 +17,43 @@ func openDB(addr, user, pswd, schema string) (err error) {
 		return err
 	}
 
-	if _, err = db.Exec(`drop procedure if exists SeizeUUID;`); err != nil {
+	if err := initDB(schema); err != nil {
 		return err
 	}
-	if _, err = db.Exec(`
+
+	return nil
+}
+
+// 初始化数据库，自动检查表是否完整，重载储存过程
+func initDB(schema string) error {
+	// 建库
+	if _, err := db.Exec(`create database if not exists ? character set UTF8;`, schema); err != nil {
+		return err
+	}
+
+	// 建表
+	if _, err := db.Exec(`
+create table table_name
+(
+	QQ bigint null,
+	Name text null,
+	UUID binary(16) null,
+	constraint table_name_pk
+		primary key (QQ)
+);
+`); err != nil {
+		return err
+	}
+
+	if _, err := db.Exec(`create unique index table_name_UUID_uindex on players (UUID);`); err != nil {
+		return err
+	}
+
+	// 加载储存过程
+	if _, err := db.Exec(`drop procedure if exists SeizeUUID;`); err != nil {
+		return err
+	}
+	if _, err := db.Exec(`
 create procedure SeizeUUID(in MyQQ bigint, in MyName text, in MyUUID binary(16))
 begin
     declare oldName text;
@@ -38,7 +71,6 @@ end;
 `); err != nil {
 		return err
 	}
-
 	return nil
 }
 

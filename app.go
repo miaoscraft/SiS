@@ -68,7 +68,9 @@ func onGroupMemberDecrease(subType, sendTime int32, fromGroup, fromQQ, beingOper
 		retValue = Intercept
 	}
 
-	whitelist.RemoveWhitelist(fromQQ, ret)
+	if fromGroup == data.Config.GroupID {
+		whitelist.RemoveWhitelist(fromQQ, ret)
+	}
 	return retValue
 }
 
