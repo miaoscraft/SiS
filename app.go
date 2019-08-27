@@ -75,7 +75,7 @@ func onGroupMemberDecrease(subType, sendTime int32, fromGroup, fromQQ, beingOper
 	}
 
 	if fromGroup == data.Config.GroupID {
-		whitelist.RemoveWhitelist(fromQQ, ret)
+		whitelist.RemoveWhitelist(beingOperateQQ, ret)
 	}
 	return retValue
 }
