@@ -22,7 +22,7 @@ func GroupMsg(from int64, msg string, ret func(msg string)) bool {
 		cmd := msg[len(CmdPrefix):]
 		args := strings.Fields(cmd)
 		switch {
-		case len(args) > 1 && args[0] == "ping":
+		case len(args) >= 1 && args[0] == "ping":
 			return ping.Ping(args, ret)
 		}
 	}
