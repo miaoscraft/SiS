@@ -106,6 +106,8 @@ func UnsetWhitelist(QQ int64) (uuid.UUID, bool, error) {
 		if err != nil {
 			return uuid.Nil, false, err
 		}
+	} else {
+		return uuid.Nil, false, nil
 	}
 
 	// 然后删除
