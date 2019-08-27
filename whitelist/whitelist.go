@@ -73,6 +73,8 @@ func RemoveWhitelist(qq int64, ret func(msg string)) {
 			ret(fmt.Sprintf("消除白名单%s失败: %v", name, err))
 			return
 		}
+
+		ret("消除了" + name + "的白名单")
 	}
 }
 
