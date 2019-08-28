@@ -17,15 +17,15 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	name, id, err := getUUID(name)
 	if err != nil {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家UUID失败: %v", err))
-		ret("抱歉，但查不到这个账号的UUID呀！")
+		ret("诶咦，但查不到这个账号的UUID呀！")
 		return
 	}
 
 	// 在数据库中记录
-	owner, oldName, err := data.SetWhitelist(qq, name, id)
+	owner, oldID, err := data.SetWhitelist(qq, id)
 	if err != nil {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("数据库操作失败: %v", err))
-		ret("抱歉，但这个数据库就是不让人访问呀！")
+		ret("我访问不到数据库啦？！")
 		return
 	}
 
@@ -34,8 +34,14 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		ret(fmt.Sprintf("你想要%q的白名？没门儿！因为已经被[CQ:at,qq=%d]占有啦！", name, owner))
 	} else {
 		// 删除旧的白名单
-		if oldName != nil {
-			err := data.RemoveWhitelist(*oldName)
+		if oldID != uuid.Nil {
+			oldName, err := getName(oldID)
+			if err != nil {
+				cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家UUID失败: %v", err))
+				ret("诶诶？？现在查不到之前绑定的游戏名耶")
+				return
+			}
+			err := data.RemoveWhitelist(oldName)
 			if err != nil {
 				ret(fmt.Sprintf("(ﾟﾍﾟ?)???消除白名单%s时遇到了一些问题: %v", *oldName, err))
 				return
