@@ -8,9 +8,9 @@ import (
 	"github.com/miaoscraft/SiS/whitelist"
 )
 
-//go:generate cqcfg .
+//go:generate cqcfg -c .
 // cqp: 名称: SiS
-// cqp: 版本: 1.0.0:7
+// cqp: 版本: 1.0.0:0
 // cqp: 作者: Tnze
 // cqp: 简介: Minecraft服务器综合管理器
 func main() { /*空*/ }
@@ -75,7 +75,7 @@ func onGroupMemberDecrease(subType, sendTime int32, fromGroup, fromQQ, beingOper
 	}
 
 	if fromGroup == data.Config.GroupID {
-		whitelist.RemoveWhitelist(fromQQ, ret)
+		whitelist.RemoveWhitelist(beingOperateQQ, ret)
 	}
 	return retValue
 }
@@ -85,8 +85,10 @@ const (
 	Intercept       = 1 //拦截消息
 )
 
+// 用于捕获所有panic，转换为酷Q的Fatal日志
 func panicer() {
 	if v := recover(); v != nil {
+		// 可以在这里调用debug.Stack()获取调用栈
 		cqp.AddLog(cqp.Fatal, "Main", fmt.Sprint(v))
 	}
 }

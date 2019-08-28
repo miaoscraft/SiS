@@ -57,14 +57,14 @@ func RemoveWhitelist(qq int64, ret func(msg string)) {
 	// 删除数据库中的数据
 	id, ok, err := data.UnsetWhitelist(qq)
 	if err != nil {
-		ret(fmt.Sprintf("(ﾟﾍﾟ?)???获取和删除QQ=%d的白名单时出现了一些问题: %v", qq, err))
+		ret(fmt.Sprintf("(ﾟﾍﾟ?)???为QQ=%d的白名单操作数据库时出现了一些问题: %v", qq, err))
 		return
 	}
 
 	if ok { // 若这个QQ绑定了白名
 		name, err := getName(id)
 		if err != nil {
-			ret(fmt.Sprintf("(ﾟﾍﾟ?)???获取和删除QQ=%d的白名单时出现了一些问题: %v", qq, err))
+			ret(fmt.Sprintf("(ﾟﾍﾟ?)???查询QQ=%d的游戏名时出现了一些问题: %v", qq, err))
 			return
 		}
 
@@ -73,6 +73,8 @@ func RemoveWhitelist(qq int64, ret func(msg string)) {
 			ret(fmt.Sprintf("(ﾟﾍﾟ?)???消除白名单%s时出现了一些问题: %v", name, err))
 			return
 		}
+
+		ret("消除了" + name + "的白名单")
 	}
 }
 

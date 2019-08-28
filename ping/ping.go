@@ -103,7 +103,7 @@ var tmp = template.Must(template.
 	New("PingRet").
 	Parse(`喵哈喽～
 服务器版本: [{{ .Version.Protocol }}] {{ .Version.Name }}
-Motd: {{ .Description }}
+Motd: {{ .Description.ClearString }}
 延迟: {{.Delay }}
 在线人数: {{ .Players.Online -}}/{{- .Players.Max }}
 玩家列表:
