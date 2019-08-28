@@ -17,14 +17,9 @@ func Init() error {
 	}
 
 	// 连接数据库
-	err = openDB(
-		Config.Database.Address,
-		Config.Database.User,
-		Config.Database.Password,
-		Config.Database.Schema,
-	)
+	err = openDB(filepath.Join(cqp.GetAppDir(), "data.db"))
 	if err != nil {
-		return fmt.Errorf("连接数据库出错: %v", err)
+		return fmt.Errorf("打开数据库出错: %v", err)
 	}
 
 	// 连接MC服务器
@@ -50,13 +45,6 @@ var Config struct {
 	Ping struct {
 		DefaultServer string
 		Timeout       duration
-	}
-	// MySQL数据库
-	Database struct {
-		Address  string
-		User     string
-		Password string
-		Schema   string
 	}
 }
 

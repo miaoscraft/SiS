@@ -27,15 +27,10 @@ Timeout = "60s"
 Address = "127.0.0.1"
 Password = "your_password"
 
-# 数据库配置
-[Database]
-Address = "127.0.0.1"
-User = "your_mysql_username"
-Password = "your_mysql_password"
-Schema = "数据库库名"
 ```
 
 ## 数据接口
-数据库暂仅支持MySQL，计划支持SQLite。  
+~~数据库暂仅支持MySQL，计划支持SQLite。~~
+改为使用bolt数据库  
 支持`toml`配置文件格式，通俗易懂类似`.ini`。  
 通过RCON协议与MC服务器通信，同时支持官方服务器与Bukkit系列，无需服务器插件。
