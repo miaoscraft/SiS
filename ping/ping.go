@@ -102,7 +102,7 @@ type status struct {
 var tmp = template.Must(template.
 	New("PingRet").
 	Parse(`服务器: [{{ .Version.Protocol }}] {{ .Version.Name }}
-每日消息: {{ .Description }}
+每日消息: {{ .Description.ClearString }}
 在线人数: {{ .Players.Online -}}/{{- .Players.Max }}
 玩家列表:
 {{ range .Players.Sample }}- [{{ .Name }}]
