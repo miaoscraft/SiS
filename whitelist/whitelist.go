@@ -17,7 +17,7 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	name, id, err := getUUID(name)
 	if err != nil {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家UUID失败: %v", err))
-		ret("诶咦，但查不到这个账号的UUID呀！")
+		ret("啊咧？查不到这个账号的UUID呀！")
 		return
 	}
 
@@ -32,42 +32,46 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	// 若owner是当前处理的用户则说明绑定成功，否则就是失败
 	if owner != qq {
 		ret(fmt.Sprintf("你想要%q的白名？没门儿！因为已经被[CQ:at,qq=%d]占有啦！", name, owner))
-	} else {
-		// 删除旧的白名单
-		if oldID != uuid.Nil {
-			oldName, err := getName(oldID)
-			if err != nil {
-				cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家UUID失败: %v", err))
-				ret("诶诶？？现在查不到之前绑定的游戏名耶")
-				return
-			}
-			err := data.RemoveWhitelist(oldName)
-			if err != nil {
-				ret(fmt.Sprintf("(ﾟﾍﾟ?)???消除白名单%s时遇到了一些问题: %v", *oldName, err))
-				return
-			}
-		}
-
-		// 添加白名单
-		err := data.AddWhitelist(name)
-		if err != nil {
-			ret(fmt.Sprintf("(ﾟﾍﾟ?)???添加白名单%s时遇到了一些问题: %v", *oldName, err))
-			return
-		}
-
-		ret(fmt.Sprintf("kira~已为您添加白名单: %s", name))
+		return
 	}
+
+	// 删除旧的白名单
+	if oldID != uuid.Nil {
+		// 获取旧用户名
+		oldName, err := getName(oldID)
+		if err != nil {
+			cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家Name失败: %v", err))
+			ret("诶诶？？现在查不到之前绑定的游戏名耶")
+		} else {
+			// 删除旧白名单
+			err = data.RemoveWhitelist(oldName)
+			if err != nil {
+				cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("删除白名单失败: %v", err))
+				ret("服务器貌似不想消掉你旧的白名单(ﾟﾍﾟ?)???")
+			}
+		}
+	}
+
+	// 添加白名单
+	err = data.AddWhitelist(name)
+	if err != nil {
+		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("添加白名单失败: %v", err))
+		ret("添加白名单居然失败了……服务器有她自己的想法_(:з」∠)_")
+		return
+	}
+
+	ret(fmt.Sprintf("kira~已为您添加白名单: %s", name))
 }
 
 func RemoveWhitelist(qq int64, ret func(msg string)) {
 	// 删除数据库中的数据
-	id, ok, err := data.UnsetWhitelist(qq)
+	id, err := data.UnsetWhitelist(qq)
 	if err != nil {
 		ret(fmt.Sprintf("(ﾟﾍﾟ?)???为QQ=%d的白名单操作数据库时出现了一些问题: %v", qq, err))
 		return
 	}
 
-	if ok { // 若这个QQ绑定了白名
+	if id != uuid.Nil { // 若这个QQ绑定了白名
 		name, err := getName(id)
 		if err != nil {
 			ret(fmt.Sprintf("(ﾟﾍﾟ?)???查询QQ=%d的游戏名时出现了一些问题: %v", qq, err))
