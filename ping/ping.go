@@ -28,14 +28,14 @@ func Ping(args []string, ret func(msg string)) bool {
 		resp, delay, err = bot.PingAndList(getAddr(args))
 	}
 	if err != nil {
-		ret(fmt.Sprintf("请求失败: %v", err))
+		ret(fmt.Sprintf("嘶...请求失败惹！: %v", err))
 		return true
 	}
 
 	var s status
 	err = json.Unmarshal(resp, &s)
 	if err != nil {
-		ret(fmt.Sprintf("解码失败: %v", err))
+		ret(fmt.Sprintf("嘶...解码失败惹！: %v", err))
 		return true
 	}
 	// 延迟用手动填进去
@@ -101,18 +101,20 @@ type status struct {
 
 var tmp = template.Must(template.
 	New("PingRet").
-	Parse(`服务器: [{{ .Version.Protocol }}] {{ .Version.Name }}
-每日消息: {{ .Description.ClearString }}
+	Parse(`喵哈喽～
+服务器版本: [{{ .Version.Protocol }}] {{ .Version.Name }}
+Motd: {{ .Description.ClearString }}
+延迟: {{.Delay }}
 在线人数: {{ .Players.Online -}}/{{- .Players.Max }}
 玩家列表:
 {{ range .Players.Sample }}- [{{ .Name }}]
-{{ end }}延迟: {{.Delay }}`))
+{{ end }}にゃ～`))
 
 func (s status) String() string {
 	var sb strings.Builder
 	err := tmp.Execute(&sb, s)
 	if err != nil {
-		return fmt.Sprintf("文字模版渲染失败: %v", err)
+		return fmt.Sprintf("似乎在渲染文字模版时出现了棘手的问题: %v", err)
 	}
 	return sb.String()
 }

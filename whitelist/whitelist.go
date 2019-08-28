@@ -17,7 +17,7 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	name, id, err := getUUID(name)
 	if err != nil {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家UUID失败: %v", err))
-		ret("无法查询到玩家的UUID")
+		ret("抱歉，但查不到这个账号的UUID呀！")
 		return
 	}
 
@@ -25,19 +25,19 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	owner, oldName, err := data.SetWhitelist(qq, name, id)
 	if err != nil {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("数据库操作失败: %v", err))
-		ret("无法访问到数据库")
+		ret("抱歉，但这个数据库就是不让人访问呀！")
 		return
 	}
 
 	// 若owner是当前处理的用户则说明绑定成功，否则就是失败
 	if owner != qq {
-		ret(fmt.Sprintf("账号%q当前被[CQ:at,qq=%d]占有", name, owner))
+		ret(fmt.Sprintf("你想要%q的白名？没门儿！因为已经被[CQ:at,qq=%d]占有啦！", name, owner))
 	} else {
 		// 删除旧的白名单
 		if oldName != nil {
 			err := data.RemoveWhitelist(*oldName)
 			if err != nil {
-				ret(fmt.Sprintf("消除白名单%s失败: %v", *oldName, err))
+				ret(fmt.Sprintf("(ﾟﾍﾟ?)???消除白名单%s时遇到了一些问题: %v", *oldName, err))
 				return
 			}
 		}
@@ -45,11 +45,11 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		// 添加白名单
 		err := data.AddWhitelist(name)
 		if err != nil {
-			ret(fmt.Sprintf("添加白名单%s失败: %v", *oldName, err))
+			ret(fmt.Sprintf("(ﾟﾍﾟ?)???添加白名单%s时遇到了一些问题: %v", *oldName, err))
 			return
 		}
 
-		ret(fmt.Sprintf("已为您添加白名单: %s", name))
+		ret(fmt.Sprintf("kira~已为您添加白名单: %s", name))
 	}
 }
 
@@ -57,20 +57,20 @@ func RemoveWhitelist(qq int64, ret func(msg string)) {
 	// 删除数据库中的数据
 	id, ok, err := data.UnsetWhitelist(qq)
 	if err != nil {
-		ret(fmt.Sprintf("从数据库删除QQ=%d的白名单失败: %v", qq, err))
+		ret(fmt.Sprintf("(ﾟﾍﾟ?)???为QQ=%d的白名单操作数据库时出现了一些问题: %v", qq, err))
 		return
 	}
 
 	if ok { // 若这个QQ绑定了白名
 		name, err := getName(id)
 		if err != nil {
-			ret(fmt.Sprintf("获取UUID(%v)的游戏名失败: %v", id, err))
+			ret(fmt.Sprintf("(ﾟﾍﾟ?)???查询QQ=%d的游戏名时出现了一些问题: %v", qq, err))
 			return
 		}
 
 		err = data.RemoveWhitelist(name)
 		if err != nil {
-			ret(fmt.Sprintf("消除白名单%s失败: %v", name, err))
+			ret(fmt.Sprintf("(ﾟﾍﾟ?)???消除白名单%s时出现了一些问题: %v", name, err))
 			return
 		}
 
@@ -127,7 +127,7 @@ func getName(UUID uuid.UUID) (string, error) {
 	}
 
 	if len(resp) < 1 {
-		return "", errors.New("没有查询到值")
+		return "", errors.New("(ﾟﾍﾟ?)???没有查询到值")
 	}
 
 	return resp[0].Name, nil
