@@ -28,14 +28,14 @@ func Ping(args []string, ret func(msg string)) bool {
 		resp, delay, err = bot.PingAndList(getAddr(args))
 	}
 	if err != nil {
-		ret(fmt.Sprintf("请求失败: %v", err))
+		ret(fmt.Sprintf("嘶...请求失败惹！: %v", err))
 		return true
 	}
 
 	var s status
 	err = json.Unmarshal(resp, &s)
 	if err != nil {
-		ret(fmt.Sprintf("解码失败: %v", err))
+		ret(fmt.Sprintf("嘶...解码失败惹！: %v", err))
 		return true
 	}
 	// 延迟用手动填进去
@@ -114,7 +114,7 @@ func (s status) String() string {
 	var sb strings.Builder
 	err := tmp.Execute(&sb, s)
 	if err != nil {
-		return fmt.Sprintf("文字模版渲染失败: %v", err)
+		return fmt.Sprintf("似乎在渲染文字模版时出现了棘手的问题: %v", err)
 	}
 	return sb.String()
 }
