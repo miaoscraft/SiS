@@ -8,16 +8,25 @@ import (
 	"time"
 )
 
+// AppDir 当前插件数据目录
+var AppDir string
+
 // Init 初始化插件的数据源，包括读取配置文件、建立数据库连接
 func Init() error {
+	AppDir = cqp.GetAppDir()
+	// 初始化默认文件
+	err := initFiles()
+	if err != nil {
+		return fmt.Errorf("创建文件时出错: %v", err)
+	}
 	// 读取配置文件
-	err := readConfig()
+	err = readConfig()
 	if err != nil {
 		return fmt.Errorf("读配置文件出错: %v", err)
 	}
 
 	// 连接数据库
-	err = openDB(filepath.Join(cqp.GetAppDir(), "data.db"))
+	err = openDB(filepath.Join(AppDir, "data.db"))
 	if err != nil {
 		return fmt.Errorf("打开数据库出错: %v", err)
 	}
@@ -59,7 +68,7 @@ func (d *duration) UnmarshalText(text []byte) error {
 }
 
 func readConfig() error {
-	md, err := toml.DecodeFile(filepath.Join(cqp.GetAppDir(), "conf.toml"), &Config)
+	md, err := toml.DecodeFile(filepath.Join(AppDir, "conf.toml"), &Config)
 	if err != nil {
 		return err
 	}
