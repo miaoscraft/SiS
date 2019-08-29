@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 	"github.com/google/uuid"
 	"github.com/miaoscraft/SiS/data"
-	"io"
-	"net/http"
 )
 
 func MyID(qq int64, name string, ret func(msg string)) {
@@ -17,10 +18,10 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	name, id, err := getUUID(name)
 	if err != nil {
 		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家UUID失败: %v", err))
-		ret("啊咧？查不到这个账号的UUID呀！")
+		ret("我不要你觉得，我要我觉得" + name + "是个假名字")
 		return
 	}
-
+  
 	onOldID := func(oldID uuid.UUID) error {
 		// 删除用户的旧白名单
 		oldName, err := getName(oldID)
@@ -59,8 +60,8 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		ret(fmt.Sprintf("你想要%q的白名？没门儿！因为已经被[CQ:at,qq=%d]占有啦！", name, owner))
 		return
 	}
-
-	ret(fmt.Sprintf("kira~已为您添加白名单: %s", name))
+  
+  ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n你要这个吗？\n\n {\\__/}\n ( • - •)\n%s< \\\n这是[CQ:at,qq=%d]的", name, "..."+name[0:3], owner))
 }
 
 func RemoveWhitelist(qq int64, ret func(msg string)) {
@@ -75,7 +76,7 @@ func RemoveWhitelist(qq int64, ret func(msg string)) {
 			return fmt.Errorf("删除%s白名单失败: %v", name, err)
 		}
 
-		ret("消除了" + name + "的白名单:)")
+    ret( name + "，你白名单(号)没了")
 		return nil
 	}
 	// 删除数据库中的数据
