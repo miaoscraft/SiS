@@ -21,7 +21,7 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		ret("我不要你觉得，我要我觉得" + name + "是个假名字")
 		return
 	}
-  
+
 	onOldID := func(oldID uuid.UUID) error {
 		// 删除用户的旧白名单
 		oldName, err := getName(oldID)
@@ -57,11 +57,25 @@ func MyID(qq int64, name string, ret func(msg string)) {
 
 	// 若owner是当前处理的用户则说明绑定成功，否则就是失败
 	if owner != qq {
-		ret(fmt.Sprintf("你想要%q的白名？没门儿！因为已经被[CQ:at,qq=%d]占有啦！", name, owner))
+		if len(name) < 3 {
+			ret(fmt.Sprintf("白名单%s现在在[CQ:at,qq=%d]手上", name, owner))
+		} else {
+			ret(fmt.Sprintf(`{\\__/}
+( • . •)
+/ >%s
+你要这个吗？
+
+{\\__/}
+( • - •)
+%s< \\
+这是[CQ:at,qq=%d]的`, name, "..."+name[len(name)-3:], owner))
+		}
 		return
 	}
-  
-  ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n你要这个吗？\n\n {\\__/}\n ( • - •)\n%s< \\\n这是[CQ:at,qq=%d]的", name, "..."+name[0:3], owner))
+	ret(fmt.Sprintf(`{\\__/}
+( • . •)
+/ >%s
+呐，你的白名单`, name))
 }
 
 func RemoveWhitelist(qq int64, ret func(msg string)) {
@@ -76,7 +90,7 @@ func RemoveWhitelist(qq int64, ret func(msg string)) {
 			return fmt.Errorf("删除%s白名单失败: %v", name, err)
 		}
 
-    ret( name + "，你白名单(号)没了")
+		ret(name + "，你白名单(号)没了")
 		return nil
 	}
 	// 删除数据库中的数据

@@ -21,7 +21,6 @@ func init() {
 	cqp.Enable = onEnable
 	cqp.GroupMsg = onGroupMsg
 	cqp.GroupMemberDecrease = onGroupMemberDecrease
-
 }
 
 // 插件启用事件
@@ -31,7 +30,7 @@ func onEnable() int32 {
 	// 连接数据源
 	err := data.Init()
 	if err != nil {
-		cqp.AddLog(cqp.Error, "Init", fmt.Sprintf("初始化数据源失败: %v", err))
+		cqp.AddLog(cqp.Fatal, "Init", fmt.Sprintf("初始化数据源失败: %v", err))
 	}
 
 	// 将登录账号载入命令解析器（用于识别@）
