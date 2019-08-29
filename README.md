@@ -14,9 +14,16 @@
 群员可进一步指定服务器端口，有两种格式均可行：
 	- `@robot ping play.miaoscraft.cn:25565`
 	- `@robot ping play.miaoscraft.cn 25565`。
-
+3. 自定义指令  
+在配置文件中配置自定义指令，即可在Q群内执行预先配置好的命令；命令可根据需要调节权限。
+例如配置了查看tps的自定义指令后可发送`@robot tps`指令查看服务器tps（需要服务器支持）。
+```toml
+[Cmd.tps]		# 指令触发名
+Level = 0 		# 权限0表示任何人均可以执行
+Command = "tps"		# 实际执行的命令
+```
 ## 配置文件
-请务必修改配置文件
+请务必修改配置文件conf.toml，填写RCON服务器密码等相关信息
 
 ## 数据接口
 ~~数据库暂仅支持MySQL，计划支持SQLite。~~
