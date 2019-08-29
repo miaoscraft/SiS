@@ -1,3 +1,4 @@
+// Package syntax 实现SiS机器人支持的语法的解析和执行
 package syntax
 
 import (
