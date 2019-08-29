@@ -12,6 +12,7 @@ func initFiles() error {
 	load := func(f *os.File, content string) error {
 		_, err := io.Copy(f, strings.NewReader(content))
 		if err != nil {
+			_ = f.Close()
 			return err
 		}
 		return f.Close()
