@@ -64,7 +64,7 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		}
 		return
 	}
-	ret(fmt.Sprintf(`{\\__/}\n( • . •)\n/ >%s\n呐，你的白名单`, name))
+	ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n呐，你的白名单", name))
 }
 
 func RemoveWhitelist(qq int64, ret func(msg string)) {
