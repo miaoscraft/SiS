@@ -26,7 +26,7 @@ func openDB(name string) (err error) {
 func initDB() error {
 	return db.Update(func(tx *bolt.Tx) error {
 		for _, b := range []string{
-			"QQ->UUID", "UUID->QQ",
+			"QQ->UUID", "UUID->QQ", "QQ->Level",
 		} {
 			_, err := tx.CreateBucketIfNotExists([]byte(b))
 			if err != nil {
@@ -109,6 +109,26 @@ func UnsetWhitelist(QQ int64, onHas func(ID uuid.UUID) error) error {
 
 		return nil
 	})
+}
+
+// GetLevel 获取某人的权限等级
+func GetLevel(QQ int64) (level int64, err error) {
+	err = db.View(func(tx *bolt.Tx) error {
+		bytesLevel := tx.Bucket([]byte("QQ->Level")).Get(int64Bits(QQ))
+		level, _ = binary.Varint(bytesLevel)
+		return nil
+	})
+	return
+}
+
+// SetLevel 设置某人的权限等级
+func SetLevel(QQ, level int64) (err error) {
+	err = db.Update(func(tx *bolt.Tx) error {
+		var buf [10]byte
+		return tx.Bucket([]byte("QQ->Level")).Put(int64Bits(QQ),
+			buf[:binary.PutVarint(buf[:], level)])
+	})
+	return
 }
 
 func int64Bits(n int64) (b []byte) {

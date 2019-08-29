@@ -55,6 +55,13 @@ var Config struct {
 		DefaultServer string
 		Timeout       duration
 	}
+
+	// 自定义命令
+	Cmd map[string]struct {
+		Level   int64
+		Command string
+		Silent  bool
+	}
 }
 
 type duration struct {

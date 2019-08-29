@@ -1,3 +1,4 @@
+// Package ping 提供内置指令"ping"的实现
 package ping
 
 import (
@@ -99,7 +100,7 @@ type status struct {
 	}
 	//favicon ignored
 
-	Delay time.Duration
+	Delay time.Duration `json:"-"`
 }
 
 var tmp = template.Must(template.

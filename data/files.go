@@ -45,5 +45,16 @@ Timeout = "60s" # 最长ping时间，为0时禁用。例如："300ms", "1.5h" �
 
 [RCON] # RCON配置
 Address = "127.0.0.1:25575" #服务器地址:端口，必须写上端口
-Password = "your_password" #服务器RCON密码，server.properties文件里的rcon.password`,
+Password = "your_password" #服务器RCON密码，server.properties文件里的rcon.password
+
+# 自定义命令配置
+[Cmd.tps] # 命令名
+Level = 0 # 执行该命令所需等级
+Command = "tps" # 执行时实际发送的命令
+# Silent = true # 是否不返回命令输出
+
+[Cmd."帮助"] # 中文命令需要引号
+Level = 0
+Command = "help"
+`,
 }

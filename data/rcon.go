@@ -17,8 +17,8 @@ func openRCON(address, password string) (err error) {
 	return reopenRCON()
 }
 
-// rconCommand 执行RCON命令，断线时尝试重连一次
-func rconCommand(cmd string) (string, error) {
+// RCONCmd 执行RCON命令，断线时尝试重连一次
+func RCONCmd(cmd string) (string, error) {
 ReTry:
 	err := rcon.Cmd(cmd)
 	if err != nil {
@@ -44,12 +44,12 @@ ReTry:
 
 // AddWhitelist 从游戏服务器添加白名单
 func AddWhitelist(name string) error {
-	_, err := rconCommand("whitelist add " + name)
+	_, err := RCONCmd("whitelist add " + name)
 	return err
 }
 
 // RemoveWhitelist 从游戏服务器删除白名单
 func RemoveWhitelist(name string) error {
-	_, err := rconCommand("whitelist remove " + name)
+	_, err := RCONCmd("whitelist remove " + name)
 	return err
 }
