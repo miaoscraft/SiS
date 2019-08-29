@@ -39,7 +39,7 @@ func initDB() error {
 
 // SetWhitelist 尝试向数据库写入白名单数据，当ID未被占用时返回自己的QQ，当ID被占用则返回占用者的QQ
 // 若原本该账号占有一个UUID，则会返回当时的UUID
-func SetWhitelist(QQ int64, ID uuid.UUID) (owner int64, oldID uuid.UUID, err error) {
+func SetWhitelist(QQ int64, ID uuid.UUID, onOldID func(oldID uuid.UUID) error, onSuccess func() error) (owner int64, err error) {
 	bytesQQ := int64Bits(QQ)
 
 	err = db.Update(func(tx *bolt.Tx) error {
@@ -58,9 +58,15 @@ func SetWhitelist(QQ int64, ID uuid.UUID) (owner int64, oldID uuid.UUID, err err
 		// 读旧ID
 		bytesID := qu.Get(bytesQQ)
 		if len(bytesID) == 16 {
+			var oldID uuid.UUID
 			copy(oldID[:], bytesID)
 			// 读到了就可以删了,qu不用删是因为马上就要写入新的数据
 			err := uq.Delete(bytesID)
+			if err != nil {
+				return err
+			}
+
+			err = onOldID(oldID) // 此时删除旧白名单，若失败则回滚
 			if err != nil {
 				return err
 			}
@@ -76,6 +82,11 @@ func SetWhitelist(QQ int64, ID uuid.UUID) (owner int64, oldID uuid.UUID, err err
 			return err
 		}
 
+		err = onSuccess() // 添加白名单，若出错则回滚
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
@@ -83,16 +94,21 @@ func SetWhitelist(QQ int64, ID uuid.UUID) (owner int64, oldID uuid.UUID, err err
 }
 
 // UnsetWhitelist 从数据库获取玩家绑定的ID，返回UUID并删除记录
-func UnsetWhitelist(QQ int64) (uuid.UUID, error) {
+func UnsetWhitelist(QQ int64, onHas func(ID uuid.UUID) error) error {
 	var UUID uuid.UUID
-	err := db.Update(func(tx *bolt.Tx) error {
+	return db.Update(func(tx *bolt.Tx) error {
 		qu := tx.Bucket([]byte("QQ->UUID"))
 		copy(UUID[:], qu.Get(int64Bits(QQ)))
+
+		if UUID != uuid.Nil { //删除白名单，若失败则回滚
+			err := onHas(UUID)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
-
-	//返回的是读出来的数据
-	return UUID, err
 }
 
 func int64Bits(n int64) (b []byte) {

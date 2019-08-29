@@ -21,71 +21,70 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		ret("我不要你觉得，我要我觉得" + name + "是个假名字")
 		return
 	}
+  
+	onOldID := func(oldID uuid.UUID) error {
+		// 删除用户的旧白名单
+		oldName, err := getName(oldID)
+		if err != nil {
+			return fmt.Errorf("向Mojang查询玩家Name失败: %v", err)
+		}
+
+		// 删除旧白名单
+		err = data.RemoveWhitelist(oldName)
+		if err != nil {
+			return fmt.Errorf("删除白名单失败: %v", err)
+		}
+
+		return nil
+	}
+
+	onSuccess := func() error {
+		// 添加白名单
+		err = data.AddWhitelist(name)
+		if err != nil {
+			return fmt.Errorf("添加白名单失败: %v", err)
+		}
+		return nil
+	}
 
 	// 在数据库中记录
-	owner, oldID, err := data.SetWhitelist(qq, id)
+	owner, err := data.SetWhitelist(qq, id, onOldID, onSuccess)
 	if err != nil {
-		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("操作失败: %v", err))
-		ret("お兄ちゃん！！！数据库欺负我！！！")
+		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("设置白名单失败: %v", err))
+		ret("白名单貌似没有成功加上欸，怎么办ʕ •ᴥ•ʔ")
 		return
 	}
 
 	// 若owner是当前处理的用户则说明绑定成功，否则就是失败
 	if owner != qq {
-		ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n你要这个吗？\n\n {\\__/}\n ( • - •)\n%s< \\\n这是[CQ:at,qq=%d]的", name, "..."+name[0:3], owner))
+		ret(fmt.Sprintf("你想要%q的白名？没门儿！因为已经被[CQ:at,qq=%d]占有啦！", name, owner))
 		return
 	}
-
-	// 删除旧的白名单
-	if oldID != uuid.Nil {
-		// 获取旧用户名
-		oldName, err := getName(oldID)
-		if err != nil {
-			cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("向Mojang查询玩家Name失败: %v", err))
-			ret("诶诶？？现在查不到之前绑定的游戏名耶")
-		} else {
-			// 删除旧白名单
-			err = data.RemoveWhitelist(oldName)
-			if err != nil {
-				cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("删除白名单失败: %v", err))
-				ret("服务器貌似不想消掉你旧的白名单(ﾟﾍﾟ?)???")
-			}
-		}
-	}
-
-	// 添加白名单
-	err = data.AddWhitelist(name)
-	if err != nil {
-		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("添加白名单失败: %v", err))
-		ret("添加白名单居然失败了……服务器有她自己的想法_(:з」∠)_")
-		return
-	}
-
-	ret(fmt.Sprintf("kira~已为您添加白名单: %s", name))
+  
+  ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n你要这个吗？\n\n {\\__/}\n ( • - •)\n%s< \\\n这是[CQ:at,qq=%d]的", name, "..."+name[0:3], owner))
 }
 
 func RemoveWhitelist(qq int64, ret func(msg string)) {
-	// 删除数据库中的数据
-	id, err := data.UnsetWhitelist(qq)
-	if err != nil {
-		ret(fmt.Sprintf("(ﾟﾍﾟ?)???为QQ=%d的白名单操作数据库时出现了一些问题: %v", qq, err))
-		return
-	}
-
-	if id != uuid.Nil { // 若这个QQ绑定了白名
-		name, err := getName(id)
+	onHas := func(ID uuid.UUID) error {
+		name, err := getName(ID)
 		if err != nil {
-			ret(fmt.Sprintf("(ﾟﾍﾟ?)???查询QQ=%d的游戏名时出现了一些问题: %v", qq, err))
-			return
+			return fmt.Errorf("查询QQ%d游戏名失败: %v", qq, err)
 		}
 
 		err = data.RemoveWhitelist(name)
 		if err != nil {
-			ret(fmt.Sprintf("(ﾟﾍﾟ?)???白名单%s移除不了: %v", name, err))
-			return
+			return fmt.Errorf("删除%s白名单失败: %v", name, err)
 		}
 
-		ret(name + "，你白名单(号)没了")
+    ret( name + "，你白名单(号)没了")
+		return nil
+	}
+	// 删除数据库中的数据
+	err := data.UnsetWhitelist(qq, onHas)
+	if err != nil {
+		cqp.AddLog(cqp.Error, "MyID", fmt.Sprintf("删除白名单失败: %v", err))
+		ret("我的系统又出问题了(つД`)ノ")
+		return
 	}
 }
 

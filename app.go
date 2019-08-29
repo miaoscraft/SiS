@@ -6,6 +6,7 @@ import (
 	"github.com/miaoscraft/SiS/data"
 	"github.com/miaoscraft/SiS/syntax"
 	"github.com/miaoscraft/SiS/whitelist"
+	"runtime/debug"
 )
 
 //go:generate cqcfg -c .
@@ -88,7 +89,7 @@ const (
 // 用于捕获所有panic，转换为酷Q的Fatal日志
 func panicer() {
 	if v := recover(); v != nil {
-		// 可以在这里调用debug.Stack()获取调用栈
-		cqp.AddLog(cqp.Fatal, "Main", fmt.Sprint(v))
+		// 在这里调用debug.Stack()获取调用栈
+		cqp.AddLog(cqp.Fatal, "Main", fmt.Sprintf("%v\n%s", v, debug.Stack()))
 	}
 }
