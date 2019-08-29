@@ -64,18 +64,21 @@ func getAddr(args []string) (addr string, port int) {
 		}
 	}
 
+	// 如果有则加载第一个参数
 	if len(args) >= 1 {
-		// 在冒号后面寻找端口
-		f := strings.Split(args[0], ":")
-		if len(f) >= 2 {
-			if p, err := strconv.Atoi(f[1]); err == nil {
-				port = p
-			}
-		}
-
-		// 冒号前面是地址
-		addr = f[0]
+		addr = args[0]
 	}
+
+	// 在冒号后面寻找端口
+	f := strings.Split(addr, ":")
+	if len(f) >= 2 {
+		if p, err := strconv.Atoi(f[1]); err == nil {
+			port = p
+		}
+	}
+
+	// 冒号前面是地址
+	addr = f[0]
 
 	return addr, port
 }
