@@ -60,22 +60,11 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		if len(name) < 3 {
 			ret(fmt.Sprintf("白名单%s现在在[CQ:at,qq=%d]手上", name, owner))
 		} else {
-			ret(fmt.Sprintf(`{\\__/}
-( • . •)
-/ >%s
-你要这个吗？
-
-{\\__/}
-( • - •)
-%s< \\
-这是[CQ:at,qq=%d]的`, name, "..."+name[len(name)-3:], owner))
+			ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n你要这个吗？\n\n{\\__/}\n( • - •)\n%s< \\\n这是[CQ:at,qq=%d]的", name, name[len(name)-3:], owner))
 		}
 		return
 	}
-	ret(fmt.Sprintf(`{\\__/}
-( • . •)
-/ >%s
-呐，你的白名单`, name))
+	ret(fmt.Sprintf(`{\\__/}\n( • . •)\n/ >%s\n呐，你的白名单`, name))
 }
 
 func RemoveWhitelist(qq int64, ret func(msg string)) {
