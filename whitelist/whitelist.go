@@ -44,6 +44,7 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		if err != nil {
 			return fmt.Errorf("添加白名单失败: %v", err)
 		}
+		cqp.AddLog(cqp.InfoSuccess, "MyID", fmt.Sprintf("添加白名单%q成功", name))
 		return nil
 	}
 
@@ -79,6 +80,7 @@ func RemoveWhitelist(qq int64, ret func(msg string)) {
 			return fmt.Errorf("删除%s白名单失败: %v", name, err)
 		}
 
+		cqp.AddLog(cqp.InfoSuccess, "MyID", fmt.Sprintf("删除白名单%q成功", name))
 		ret(name + "，你白名单(号)没了")
 		return nil
 	}

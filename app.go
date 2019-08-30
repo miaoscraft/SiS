@@ -18,16 +18,17 @@ func main() { /*空*/ }
 
 func init() {
 	cqp.AppID = "cn.miaoscraft.sis"
-	cqp.Start = onStart
-	cqp.Exit = onExit
+	cqp.Enable = onStart
+	cqp.Disable = onStop
+	cqp.Exit = onStop
 
 	cqp.GroupMsg = onGroupMsg
 	cqp.GroupMemberDecrease = onGroupMemberDecrease
 }
 
-// 酷Q启动事件
+// 插件生命周期开始
 func onStart() int32 {
-	defer panicer()
+	defer panicConvert()
 
 	// 连接数据源
 	err := data.Init()
@@ -41,8 +42,8 @@ func onStart() int32 {
 	return 0
 }
 
-// 酷Q关闭事件
-func onExit() int32 {
+// 插件生命周期结束
+func onStop() int32 {
 	err := data.Close()
 	if err != nil {
 		cqp.AddLog(cqp.Error, "Init", fmt.Sprintf("释放数据源失败: %v", err))
@@ -52,7 +53,7 @@ func onExit() int32 {
 
 // 群消息事件
 func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, msg string, font int32) int32 {
-	defer panicer()
+	defer panicConvert()
 
 	if fromQQ == 80000000 { // 忽略匿名
 		return Ignore
@@ -77,7 +78,7 @@ func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, ms
 
 // 群成员减少事件
 func onGroupMemberDecrease(subType, sendTime int32, fromGroup, fromQQ, beingOperateQQ int64) int32 {
-	defer panicer()
+	defer panicConvert()
 
 	retValue := Ignore
 	ret := func(resp string) {
@@ -97,7 +98,7 @@ const (
 )
 
 // 用于捕获所有panic，转换为酷Q的Fatal日志
-func panicer() {
+func panicConvert() {
 	if v := recover(); v != nil {
 		// 在这里调用debug.Stack()获取调用栈
 		cqp.AddLog(cqp.Fatal, "Main", fmt.Sprintf("%v\n%s", v, debug.Stack()))

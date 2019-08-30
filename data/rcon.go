@@ -1,8 +1,11 @@
 package data
 
 import (
+	"fmt"
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
+	"github.com/Tnze/go-mc/chat"
 	"github.com/Tnze/go-mc/net"
+	"strings"
 )
 
 var rcon net.RCONClientConn
@@ -22,7 +25,7 @@ func RCONCmd(cmd string) (string, error) {
 ReTry:
 	err := rcon.Cmd(cmd)
 	if err != nil {
-		cqp.AddLog(cqp.Error, "RCON", "rcon添加白名单失败: "+err.Error())
+		cqp.AddLog(cqp.Error, "RCON", "rcon执行失败: "+err.Error())
 		// 断线重连
 		err = reopenRCON()
 		if err != nil {
@@ -38,7 +41,10 @@ ReTry:
 		return "", err
 	}
 
-	cqp.AddLog(cqp.Info, "RCON", "RCON: "+resp)
+	cqp.AddLog(cqp.Info, "RCON", fmt.Sprintf("RCON返回: %q", resp))
+	// 过滤掉末尾换行符、空格和零字符，过滤§格式字符串
+	resp = chat.Message{Text: strings.TrimRight(resp, " \000\n")}.ClearString()
+
 	return resp, nil
 }
 

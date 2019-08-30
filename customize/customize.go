@@ -24,6 +24,7 @@ func Exec(cmd string, args []string, fromQQ int64, ret func(string)) bool {
 	}
 	// 权限确认
 	if cmds.Level <= level {
+		cqp.AddLog(cqp.Info, "Cmds", fmt.Sprintf("成员%d以等级%d执行指令%q", fromQQ, level, cmds.Command))
 		// 执行指令
 		resp, err := data.RCONCmd(cmds.Command)
 		if err != nil {
