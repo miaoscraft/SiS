@@ -1,22 +1,22 @@
-:: å…³é—­æŽ§åˆ¶å°å›žæ˜¾  
+:: ¹Ø±Õ¿ØÖÆÌ¨»ØÏÔ  
 @echo off
 
-:: é…·Qçš„devæ–‡ä»¶å¤¹è·¯å¾„ï¼ˆæ”¹æˆä½ è‡ªå·±çš„ï¼‰
-SET DevDir=D:\é…·Q Pro\dev\cn.miaoscraft.sis
+:: ¿áQµÄdevÎÄ¼þ¼ÐÂ·¾¶£¨¸Ä³ÉÄã×Ô¼ºµÄ£©
+SET DevDir=D:\¿áQ Pro\dev\cn.miaoscraft.sis
 if not exist "%DevDir%" mkdir "%DevDir%"
 
-:: è®¾ç½®çŽ¯å¢ƒå˜é‡  
+:: ÉèÖÃ»·¾³±äÁ¿  
 SET CGO_LDFLAGS=-Wl,--kill-at
 SET CGO_ENABLED=1
 SET GOOS=windows
 SET GOARCH=386
 SET GOPROXY=https://goproxy.cn
 
-:: ç”Ÿæˆapp.json  
+:: Éú³Éapp.json  
 go generate
 
-:: ç¼–è¯‘app.dll  
+:: ±àÒëapp.dll  
 go build -buildmode=c-shared -o app.dll
 
-:: æŠŠapp.dllå’Œapp.jsonå¤åˆ¶åˆ°é…·Qçš„devæ–‡ä»¶å¤¹
+:: °Ñapp.dllºÍapp.json¸´ÖÆµ½¿áQµÄdevÎÄ¼þ¼Ð
 for %%f in (app.dll,app.json) do move %%f "%DevDir%\%%f" > nul

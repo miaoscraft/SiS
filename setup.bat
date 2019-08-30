@@ -5,13 +5,13 @@ SET GOOS=windows
 SET GOARCH=386
 SET GOPROXY=https://goproxy.cn
 
-::æ£€æŸ¥æ˜¯å¦å®‰è£…äº†ç¼–è¯‘å™¨
+::¼ì²éÊÇ·ñ°²×°ÁË±àÒëÆ÷
 where gcc > nul
-if errorlevel 1 echo æ‰¾ä¸åˆ°gcc
+if errorlevel 1 echo ÕÒ²»µ½gcc
 where go > nul
-if errorlevel 1 echo æ‰¾ä¸åˆ°go
+if errorlevel 1 echo ÕÒ²»µ½go
 
-::ä¸‹è½½SDK  
+::ÏÂÔØSDK  
 go get github.com/Tnze/CoolQ-Golang-SDK > nul
-::å®‰è£…cqcfg  
+::°²×°cqcfg  
 go install github.com/Tnze/CoolQ-Golang-SDK/tools/cqcfg

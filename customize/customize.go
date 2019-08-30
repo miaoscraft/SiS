@@ -11,7 +11,7 @@ import (
 // args长度必须大于0
 func Exec(cmd string, args []string, fromQQ int64, ret func(string)) bool {
 	cmds, ok := data.Config.Cmd[args[0]]
-	if ok {
+	if !ok {
 		return false
 	}
 
