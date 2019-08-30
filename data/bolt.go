@@ -4,12 +4,13 @@ import (
 	"encoding/binary"
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/google/uuid"
+	"time"
 )
 
 var db *bolt.DB
 
 func openDB(name string) (err error) {
-	db, err = bolt.Open(name, 0666, nil)
+	db, err = bolt.Open(name, 0666, &bolt.Options{Timeout: time.Second * 5})
 	if err != nil {
 		return err
 	}
