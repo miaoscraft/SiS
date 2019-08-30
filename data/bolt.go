@@ -22,6 +22,10 @@ func openDB(name string) (err error) {
 	return nil
 }
 
+func closeDB() error {
+	return db.Close()
+}
+
 // 初始化数据库
 func initDB() error {
 	return db.Update(func(tx *bolt.Tx) error {

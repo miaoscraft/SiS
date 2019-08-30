@@ -2,7 +2,7 @@
 @echo off
 
 :: 酷Q的dev文件夹路径（改成你自己的）
-SET DevDir=D:\酷Q Pro\dev\me.cqp.tnze.demo
+SET DevDir=D:\酷Q Pro\dev\cn.miaoscraft.sis
 if not exist "%DevDir%" mkdir "%DevDir%"
 
 :: 设置环境变量  

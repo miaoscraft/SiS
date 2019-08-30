@@ -23,13 +23,16 @@ func GroupMsg(from int64, msg string, ret func(msg string)) bool {
 	if strings.HasPrefix(msg, CmdPrefix) {
 		cmd := msg[len(CmdPrefix):]
 		args := strings.Fields(cmd)
-		switch {
-		// 内置指令
-		case len(args) >= 1 && args[0] == "ping":
+		if len(args) < 1 { // 如果没有首单词则不处理
+			return false
+		}
+
+		switch args[0] {
+		case "ping": // ping指令
 			return ping.Ping(args, ret)
 
 		default: // 自定义指令
-			return customize.Exec(cmd, from, ret)
+			return customize.Exec(cmd, args, from, ret)
 		}
 	}
 

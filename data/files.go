@@ -10,12 +10,14 @@ import (
 // 创建一些需要但不存在的文件
 func initFiles() error {
 	load := func(f *os.File, content string) error {
+		defer f.Close()
+
 		_, err := io.Copy(f, strings.NewReader(content))
 		if err != nil {
-			_ = f.Close()
 			return err
 		}
-		return f.Close()
+
+		return nil
 	}
 	for fileName, fileContent := range defaultFiles {
 		f, err := os.OpenFile(filepath.Join(AppDir, fileName), os.O_CREATE|os.O_EXCL|os.O_RDWR, 0666)

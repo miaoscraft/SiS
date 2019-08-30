@@ -40,6 +40,15 @@ func Init() error {
 	return nil
 }
 
+// Close 关闭所有打开的资源
+func Close() error {
+	err := closeDB()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 var Config struct {
 	// 游戏群
 	GroupID int64

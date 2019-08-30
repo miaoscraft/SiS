@@ -18,19 +18,21 @@ func main() { /*空*/ }
 
 func init() {
 	cqp.AppID = "cn.miaoscraft.sis"
-	cqp.Enable = onEnable
+	cqp.Start = onStart
+	cqp.Exit = onExit
+
 	cqp.GroupMsg = onGroupMsg
 	cqp.GroupMemberDecrease = onGroupMemberDecrease
 }
 
-// 插件启用事件
-func onEnable() int32 {
+// 酷Q启动事件
+func onStart() int32 {
 	defer panicer()
 
 	// 连接数据源
 	err := data.Init()
 	if err != nil {
-		cqp.AddLog(cqp.Fatal, "Init", fmt.Sprintf("初始化数据源失败: %v", err))
+		cqp.AddLog(cqp.Error, "Init", fmt.Sprintf("初始化数据源失败: %v", err))
 	}
 
 	// 将登录账号载入命令解析器（用于识别@）
@@ -39,11 +41,20 @@ func onEnable() int32 {
 	return 0
 }
 
+// 酷Q关闭事件
+func onExit() int32 {
+	err := data.Close()
+	if err != nil {
+		cqp.AddLog(cqp.Error, "Init", fmt.Sprintf("释放数据源失败: %v", err))
+	}
+	return 0
+}
+
 // 群消息事件
 func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, msg string, font int32) int32 {
 	defer panicer()
 
-	if fromQQ == 80000000 { //匿名
+	if fromQQ == 80000000 { // 忽略匿名
 		return Ignore
 	}
 
