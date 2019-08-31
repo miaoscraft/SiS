@@ -57,7 +57,7 @@ func TestGetLevel(t *testing.T) {
 		t.Log(level)
 	}
 
-	if err := SetLevel(3261340757, 12); err != nil {
+	if err := SetLevel(3261340757, 13); err != nil {
 		t.Fatal(err)
 	}
 

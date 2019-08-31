@@ -181,8 +181,17 @@ func UnsetWhitelist(QQ int64, onHas func(ID uuid.UUID) error) error {
 
 // GetLevel 获取某人的权限等级
 func GetLevel(QQ int64) (level int64, err error) {
+	var tx *sql.Tx
+	tx, err = db.Begin()
+	defer func() {
+		rbErr := tx.Rollback()
+		if rbErr != nil {
+			err = rbErr
+		}
+	}()
+
 	var rows *sql.Rows
-	rows, err = db.Query("SELECT Level FROM auths WHERE QQ=?", QQ)
+	rows, err = tx.Query("SELECT Level FROM auths WHERE QQ=?", QQ)
 	if err != nil {
 		return
 	}
@@ -197,6 +206,35 @@ func GetLevel(QQ int64) (level int64, err error) {
 
 // SetLevel 设置某人的权限等级
 func SetLevel(QQ, level int64) (err error) {
-	_, err = db.Exec("SELECT UPDATE auths SET Level=? WHERE QQ=?", level, QQ)
+	var tx *sql.Tx
+	tx, err = db.Begin()
+
+	// 查询是否有记录
+	var rows *sql.Rows
+	rows, err = tx.Query("SELECT Level FROM auths WHERE QQ=?", QQ)
+	if err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			return fmt.Errorf("数据库操作失败: %v，且无法回滚数据: %v", err, rollbackErr)
+		}
+		return fmt.Errorf("数据库查询等级失败: %v", err)
+	}
+
+	// 根据数据存在性判断采用INSERT还是UPDATE
+	if rows.Next() {
+		_, err = tx.Exec("UPDATE auths SET Level=? WHERE QQ=?", level, QQ)
+	} else {
+		_, err = tx.Exec("INSERT INTO auths (QQ, Level) VALUES (?,?)", QQ, level)
+	}
+	if err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			return fmt.Errorf("数据库操作失败: %v，且无法回滚数据: %v", err, rollbackErr)
+		}
+		return fmt.Errorf("数据库操作失败: %v", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("数据库提交数据失败: %v", err)
+	}
 	return
 }
