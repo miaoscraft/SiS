@@ -67,6 +67,7 @@ func Auth(args []string, fromQQ int64, ret func(string)) bool {
 	for _, v := range data.Config.Administrators {
 		if v == fromQQ {
 			// 该用户属于最高管理员
+			Logger.Infof("将%d的权限设置为%d", target, level)
 			err = data.SetLevel(target, level)
 			if err != nil {
 				Logger.Errorf("设置权限出错: %v", err)

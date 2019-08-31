@@ -122,7 +122,7 @@ func getUUID(name string) (string, uuid.UUID, error) {
 
 // getName 查询玩家的Name
 func getName(UUID uuid.UUID) (string, error) {
-	data, status, err := get("https://api.mojang.com/user/profiles/" + hex.EncodeToString(UUID[:]) + "/names")
+	data, status, err := get("https://sessionserver.mojang.com/session/minecraft/profile/" + hex.EncodeToString(UUID[:]))
 	if err != nil {
 		return "", err
 	}
