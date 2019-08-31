@@ -181,21 +181,34 @@ func UnsetWhitelist(QQ int64, onHas func(ID uuid.UUID) error) error {
 func GetLevel(QQ int64) (level int64, err error) {
 	var tx *sql.Tx
 	tx, err = db.Begin()
+	if err != nil {
+		err = fmt.Errorf("数据库开始事务失败: %v", err)
+		return
+	}
+
 	defer func() {
 		rbErr := tx.Rollback()
 		if rbErr != nil {
-			err = rbErr
+			if err != nil {
+				err = fmt.Errorf("%v, 且数据库回滚失败: %v", err, rbErr)
+			} else {
+				err = fmt.Errorf("数据库回滚失败: %v", rbErr)
+			}
 		}
 	}()
 
 	var rows *sql.Rows
 	rows, err = tx.Query("SELECT Level FROM auths WHERE QQ=?", QQ)
 	if err != nil {
+		err = fmt.Errorf("查询Level失败: %v", err)
 		return
 	}
 
 	if rows.Next() {
 		err = rows.Scan(&level)
+		if err != nil {
+			err = fmt.Errorf("读取Level失败: %v", err)
+		}
 		return
 	}
 	level = 0
@@ -206,6 +219,10 @@ func GetLevel(QQ int64) (level int64, err error) {
 func SetLevel(QQ, level int64) (err error) {
 	var tx *sql.Tx
 	tx, err = db.Begin()
+	if err != nil {
+		err = fmt.Errorf("数据库开始事务失败: %v", err)
+		return
+	}
 
 	// 查询是否有记录
 	var rows *sql.Rows
