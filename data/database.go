@@ -173,9 +173,7 @@ func UnsetWhitelist(QQ int64, onHas func(ID uuid.UUID) error) error {
 		if _, err := tx.Exec("DELETE FROM users WHERE QQ=?", QQ); err != nil {
 			return fmt.Errorf("数据库删除UUID失败: %v", err)
 		}
-		fmt.Println("成功删除数据")
 	}
-	fmt.Println("成功设置")
 	return nil
 }
 

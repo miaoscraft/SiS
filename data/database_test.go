@@ -3,22 +3,17 @@ package data
 import (
 	"github.com/google/uuid"
 	_ "github.com/mattn/go-sqlite3"
-	"path/filepath"
+	"os"
 	"testing"
 )
 
 func TestOpenDatabase_sqlite3(t *testing.T) {
-	var err error
-	dir := ""
-	//t.Log("temp:", dir)
-	//err := os.MkdirAll(dir, 0666)
-	//if err != nil {
-	//	t.Fatal(err)
-	//}
-	err = openDB("sqlite3", filepath.Join(dir, "data.db"))
+	err := openDB("sqlite3", "data.db")
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer os.Remove("data.db")
+	defer closeDB()
 
 	//owner, err := SetWhitelist(3261340757, uuid.MustParse("58f6356eb30c48118bfcd72a9ee99e74"),
 	//	func(id uuid.UUID) error {
@@ -50,6 +45,8 @@ func TestGetLevel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer os.Remove("data.db")
+	defer closeDB()
 
 	if level, err := GetLevel(3261340757); err != nil {
 		t.Fatal(err)
@@ -57,7 +54,7 @@ func TestGetLevel(t *testing.T) {
 		t.Log(level)
 	}
 
-	if err := SetLevel(3261340757, 13); err != nil {
+	if err := SetLevel(3261340757, 12); err != nil {
 		t.Fatal(err)
 	}
 
