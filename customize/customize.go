@@ -54,8 +54,8 @@ func Auth(args []string, fromQQ int64, ret func(string)) bool {
 	var target, level int64
 	var err error
 	// 解析目标QQ
-	if _, err = fmt.Sscanf(args[1], "[CQ:at,qq=%d]", &target); err != nil {
-	} else if target, err = strconv.ParseInt(args[1], 10, 64); err != nil {
+	if _, err = fmt.Sscanf(args[1], "[CQ:at,qq=%d]", &target); err == nil {
+	} else if target, err = strconv.ParseInt(args[1], 10, 64); err == nil {
 	} else {
 		return false
 	}
