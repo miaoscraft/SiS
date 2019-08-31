@@ -3,7 +3,6 @@ package whitelist
 import (
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -133,18 +132,14 @@ func getName(UUID uuid.UUID) (string, error) {
 		err = fmt.Errorf("服务器状态码非200: %v", status)
 	}
 
-	var resp []struct{ Name string }
+	var resp struct{ Name string }
 	// 解析json返回值
 	err = json.NewDecoder(data).Decode(&resp)
 	if err != nil {
 		return "", err
 	}
 
-	if len(resp) < 1 {
-		return "", errors.New("(ﾟﾍﾟ?)???没有查询到值")
-	}
-
-	return resp[0].Name, nil
+	return resp.Name, nil
 }
 
 // 发送GET请求
