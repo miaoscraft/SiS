@@ -3,7 +3,10 @@ package data
 import (
 	"database/sql"
 	"fmt"
+
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var db *sql.DB
@@ -70,7 +73,7 @@ func SetWhitelist(QQ int64, ID uuid.UUID, onOldID func(oldID uuid.UUID) error, o
 	defer func() {
 		if err != nil {
 			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				err = fmt.Errorf("数据库操作失败: %v，且无法回滚数据: %v", err, rollbackErr)
+				err = fmt.Errorf("%v，且无法回滚数据: %v", err, rollbackErr)
 			}
 		} else {
 			if err = tx.Commit(); err != nil {
@@ -79,38 +82,30 @@ func SetWhitelist(QQ int64, ID uuid.UUID, onOldID func(oldID uuid.UUID) error, o
 		}
 	}()
 
-	var rows *sql.Rows
 	// 检查UUID是否被他人占用
-	if rows, err = tx.Query("SELECT QQ FROM users WHERE UUID=?", ID[:]); err != nil {
+	err = tx.QueryRow("SELECT QQ FROM users WHERE UUID=?", ID[:]).Scan(&owner)
+	switch err {
+	case sql.ErrNoRows:
+		// 没有被占用
+		owner = QQ
+	case nil:
+		// 被占用了
+		if owner != QQ {
+			return
+		}
+	default:
+		// 查询出错
 		err = fmt.Errorf("数据库查询是否有占用者失败: %v", err)
 		return
 	}
-	// 返回占用该账号的人
-	if rows.Next() {
-		if err = rows.Scan(&owner); err != nil {
-			err = fmt.Errorf("数据库读取占用者失败: %v", err)
-			return
-		}
-		if owner != QQ {
-			return // 有人占用这这个账号，返回占用者qq和nil
-		}
-	}
-	owner = QQ //没人占用的话所有者就是自己
 
 	// 查询是否有旧白名单
-	if rows, err = tx.Query("SELECT UUID FROM users WHERE QQ=?", QQ); err != nil {
-		err = fmt.Errorf("查询旧UUID失败: %v", err)
-		return
-	}
+	var oldID uuid.UUID
+	err = tx.QueryRow("SELECT UUID FROM users WHERE QQ=?", QQ).Scan(&oldID)
 
-	if rows.Next() {
+	switch err {
+	case nil: // 有旧的UUID
 		// 消除旧账号白名单
-		var oldID uuid.UUID
-		if err = rows.Scan(&oldID); err != nil {
-			err = fmt.Errorf("数据库读取旧UUID失败: %v", err)
-			return
-		}
-
 		if err = onOldID(oldID); err != nil {
 			return
 		}
@@ -120,12 +115,15 @@ func SetWhitelist(QQ int64, ID uuid.UUID, onOldID func(oldID uuid.UUID) error, o
 			err = fmt.Errorf("数据库更新UUID失败: %v", err)
 			return
 		}
-	} else {
-		// 插入UUID
+	case sql.ErrNoRows: // 没有旧UUID
 		if _, err = tx.Exec("INSERT INTO users (QQ, UUID) VALUES (?,?)", QQ, ID[:]); err != nil {
 			err = fmt.Errorf("数据库插入UUID失败: %v", err)
 			return
 		}
+
+	default: //查询出错
+		err = fmt.Errorf("查询旧UUID失败: %v", err)
+		return
 	}
 
 	// 更新玩家UUID
@@ -197,21 +195,14 @@ func GetLevel(QQ int64) (level int64, err error) {
 		}
 	}()
 
-	var rows *sql.Rows
-	rows, err = tx.Query("SELECT Level FROM auths WHERE QQ=?", QQ)
-	if err != nil {
+	err = tx.QueryRow("SELECT Level FROM auths WHERE QQ=?", QQ).Scan(&level)
+	if err == sql.ErrNoRows {
+		level = 0
+	} else if err != nil {
 		err = fmt.Errorf("查询Level失败: %v", err)
 		return
 	}
 
-	if rows.Next() {
-		err = rows.Scan(&level)
-		if err != nil {
-			err = fmt.Errorf("读取Level失败: %v", err)
-		}
-		return
-	}
-	level = 0
 	return
 }
 
@@ -236,6 +227,12 @@ func SetLevel(QQ, level int64) (err error) {
 
 	// 根据数据存在性判断采用INSERT还是UPDATE
 	if rows.Next() {
+		if err = rows.Close(); err != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				return fmt.Errorf("关闭rows失败: %v，且无法回滚数据: %v", err, rollbackErr)
+			}
+			return fmt.Errorf("关闭rows失败: %v", err)
+		}
 		_, err = tx.Exec("UPDATE auths SET Level=? WHERE QQ=?", level, QQ)
 	} else {
 		_, err = tx.Exec("INSERT INTO auths (QQ, Level) VALUES (?,?)", QQ, level)

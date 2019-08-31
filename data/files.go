@@ -43,7 +43,8 @@ GroupID = 123456789 # 游戏群群号
 
 [Database]
 Driver = "sqlite3" # 数据库类型（仅支持mysql和sqlite3）
-Source = "{{ join .AppDir "data.db"}}"
+Source = "{{ join .AppDir "data.db"}}" # SQLite写法, 详细用法见https://github.com/mattn/go-sqlite3#dsn-examples
+# Source = "用户:密码@tcp(地址:端口)/库名" # MySQL写法, 详细用法见https://github.com/go-sql-driver/mysql#dsn-data-source-name
 
 [Ping] # Ping工具配置
 DefaultServer = "play.miaoscraft.cn" # 默认目标服务器[:端口]，端口是可选的，默认为25565
@@ -51,15 +52,15 @@ Timeout = "60s" # 最长ping时间，为0时禁用。例如："300ms", "1.5h" �
 
 [RCON] # RCON配置
 Address = "127.0.0.1:25575" #服务器地址:端口，必须写上端口
-Password = "your_password" #服务器RCON密码，server.properties文件里的rcon.password
+Password = "rcon_password" #服务器RCON密码，server.properties文件里的rcon.password
 
 # 自定义命令配置
 [Cmd.tps] # 命令名
 Level = 0 # 执行该命令所需等级
 Command = "tps" # 执行时实际发送的命令
-# Silent = true # 是否不返回命令输出
+# Silent = true # 禁用命令回显
 
-[Cmd."帮助"] # 中文命令需要引号
+[Cmd."帮助"] # 中文命令需要引号，命令不可包含空格
 Level = 0
 Command = "help"
 `,
