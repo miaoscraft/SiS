@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Tnze/go-mc/bot"
-	"github.com/Tnze/go-mc/chat"
-	"github.com/google/uuid"
-	"github.com/miaoscraft/SiS/data"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/Tnze/go-mc/chat"
+	"github.com/google/uuid"
+	"github.com/miaoscraft/SiS/data"
 )
 
 func Ping(args []string, ret func(msg string)) bool {

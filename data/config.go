@@ -3,7 +3,6 @@ package data
 import (
 	"fmt"
 	"github.com/BurntSushi/toml"
-	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 	"path/filepath"
 	"time"
 )
@@ -12,8 +11,8 @@ import (
 var AppDir string
 
 // Init 初始化插件的数据源，包括读取配置文件、建立数据库连接
-func Init() error {
-	AppDir = cqp.GetAppDir()
+func Init(dir string) error {
+	AppDir = dir
 	// 初始化默认文件
 	err := initFiles()
 	if err != nil {
@@ -91,7 +90,7 @@ func readConfig() error {
 
 	// 检查配置文件是否有多余数据，抛警告⚠️
 	if uk := md.Undecoded(); len(uk) > 0 {
-		cqp.AddLog(cqp.Warning, "Conf", fmt.Sprintf("配置文件中有未知数据: %q", uk))
+		Logger.Waringf("配置文件中有未知数据: %q", uk)
 	}
 
 	return nil

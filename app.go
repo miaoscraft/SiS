@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 	"github.com/miaoscraft/SiS/data"
+	"github.com/miaoscraft/SiS/log"
 	"github.com/miaoscraft/SiS/syntax"
 	"github.com/miaoscraft/SiS/whitelist"
 	"runtime/debug"
@@ -24,16 +25,21 @@ func init() {
 
 	cqp.GroupMsg = onGroupMsg
 	cqp.GroupMemberDecrease = onGroupMemberDecrease
+
+	whitelist.Logger = log.NewLogger("MyID")
+	data.Logger = log.NewLogger("Data")
 }
+
+var Logger = log.NewLogger("Main")
 
 // 插件生命周期开始
 func onStart() int32 {
 	defer panicConvert()
 
 	// 连接数据源
-	err := data.Init()
+	err := data.Init(cqp.GetAppDir())
 	if err != nil {
-		cqp.AddLog(cqp.Error, "Init", fmt.Sprintf("初始化数据源失败: %v", err))
+		Logger.Errorf("初始化数据源失败: %v", err)
 	}
 
 	// 将登录账号载入命令解析器（用于识别@）
@@ -44,9 +50,11 @@ func onStart() int32 {
 
 // 插件生命周期结束
 func onStop() int32 {
+	defer panicConvert()
+
 	err := data.Close()
 	if err != nil {
-		cqp.AddLog(cqp.Error, "Init", fmt.Sprintf("释放数据源失败: %v", err))
+		Logger.Errorf("释放数据源失败: %v", err)
 	}
 	return 0
 }
@@ -67,7 +75,6 @@ func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, ms
 	case data.Config.AdminID:
 		// 当前版本，管理群和游戏群收到的命令不做区分
 		fallthrough
-
 	case data.Config.GroupID:
 		if syntax.GroupMsg(fromQQ, msg, ret) {
 			return Intercept
@@ -85,7 +92,7 @@ func onGroupMemberDecrease(subType, sendTime int32, fromGroup, fromQQ, beingOper
 		cqp.SendGroupMsg(fromGroup, resp)
 		retValue = Intercept
 	}
-
+	// 尝试删白名单
 	if fromGroup == data.Config.GroupID {
 		whitelist.RemoveWhitelist(beingOperateQQ, ret)
 	}
@@ -101,6 +108,6 @@ const (
 func panicConvert() {
 	if v := recover(); v != nil {
 		// 在这里调用debug.Stack()获取调用栈
-		cqp.AddLog(cqp.Fatal, "Main", fmt.Sprintf("%v\n%s", v, debug.Stack()))
+		Logger.Errorf("%v\n%s", v, debug.Stack())
 	}
 }
