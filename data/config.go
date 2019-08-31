@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"path/filepath"
+	"strings"
+	"text/template"
 	"time"
 )
 
@@ -25,7 +27,7 @@ func Init(dir string) error {
 	}
 
 	// 连接数据库
-	err = openDB(filepath.Join(AppDir, "data.db"))
+	err = openDB(Config.Database.Driver, Config.Database.Source)
 	if err != nil {
 		return fmt.Errorf("打开数据库出错: %v", err)
 	}
@@ -53,6 +55,13 @@ var Config struct {
 	GroupID int64
 	// 管理群
 	AdminID int64
+
+	// 数据库配置
+	Database struct {
+		Driver string
+		Source string
+	}
+
 	// MC服务器远程控制台
 	RCON struct {
 		Address  string
@@ -93,5 +102,31 @@ func readConfig() error {
 		Logger.Waringf("配置文件中有未知数据: %q", uk)
 	}
 
+	// 替换文件路径Database中Source的文件路径
+	Config.Database.Source, err = rendingDBSource(Config.Database.Source)
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func rendingDBSource(raw string) (string, error) {
+	var sb strings.Builder
+	temp, err := template.
+		New("DBSource").
+		Funcs(template.FuncMap{
+			"join": filepath.Join,
+		}).
+		Parse(raw)
+	if err != nil {
+		return "", fmt.Errorf("解析模版失败: %v", err)
+	}
+
+	err = temp.Execute(&sb, struct{ AppDir string }{AppDir})
+	if err != nil {
+		return "", fmt.Errorf("渲染模版失败: %v", err)
+	}
+
+	return sb.String(), nil
 }

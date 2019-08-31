@@ -9,6 +9,7 @@ require (
 	github.com/etcd-io/bbolt v1.3.3
 	github.com/google/uuid v1.1.1
 	github.com/kr/pty v1.1.8 // indirect
+	github.com/mattn/go-sqlite3 v1.11.0
 	go.etcd.io/bbolt v1.3.3 // indirect
 	golang.org/x/crypto v0.0.0-20190829043050-9756ffdc2472 // indirect
 	golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297 // indirect

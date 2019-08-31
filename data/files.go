@@ -41,6 +41,10 @@ var defaultFiles = map[string]string{
 GroupID = 123456789 # 游戏群群号
 # AdminID = 123456789 # 管理群群号（可选）
 
+[Database]
+Driver = "sqlite3" # 数据库类型（仅支持mysql和sqlite3）
+Source = "{{ join .AppDir "data.db"}}"
+
 [Ping] # Ping工具配置
 DefaultServer = "play.miaoscraft.cn" # 默认目标服务器[:端口]，端口是可选的，默认为25565
 Timeout = "60s" # 最长ping时间，为0时禁用。例如："300ms", "1.5h" 或 "2h45m"。可用的单位有 纳秒"ns", 微妙"us" (或 "µs"), 毫秒"ms", 秒"s", 分钟"m", 小时"h".
