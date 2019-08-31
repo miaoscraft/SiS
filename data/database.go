@@ -88,6 +88,7 @@ func SetWhitelist(QQ int64, ID uuid.UUID, onOldID func(oldID uuid.UUID) error, o
 	case sql.ErrNoRows:
 		// 没有被占用
 		owner = QQ
+		err = nil
 	case nil:
 		// 被占用了
 		if owner != QQ {
@@ -120,6 +121,7 @@ func SetWhitelist(QQ int64, ID uuid.UUID, onOldID func(oldID uuid.UUID) error, o
 			err = fmt.Errorf("数据库插入UUID失败: %v", err)
 			return
 		}
+		err = nil
 
 	default: //查询出错
 		err = fmt.Errorf("查询旧UUID失败: %v", err)
@@ -198,6 +200,7 @@ func GetLevel(QQ int64) (level int64, err error) {
 	err = tx.QueryRow("SELECT Level FROM auths WHERE QQ=?", QQ).Scan(&level)
 	if err == sql.ErrNoRows {
 		level = 0
+		err = nil
 	} else if err != nil {
 		err = fmt.Errorf("查询Level失败: %v", err)
 		return

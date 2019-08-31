@@ -2,11 +2,12 @@ package data
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
 	"path/filepath"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/BurntSushi/toml"
 )
 
 // AppDir 当前插件数据目录
@@ -55,6 +56,8 @@ var Config struct {
 	GroupID int64
 	// 管理群
 	AdminID int64
+	// 管理员
+	Administrators []int64
 
 	// 数据库配置
 	Database struct {

@@ -1,5 +1,7 @@
 package data
 
+// 两个不是很完善的测试
+
 import (
 	"github.com/google/uuid"
 	"testing"

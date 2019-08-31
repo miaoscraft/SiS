@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
+	"github.com/miaoscraft/SiS/customize"
 	"github.com/miaoscraft/SiS/data"
 	"github.com/miaoscraft/SiS/log"
 	"github.com/miaoscraft/SiS/syntax"
@@ -26,6 +27,7 @@ func init() {
 	cqp.GroupMsg = onGroupMsg
 	cqp.GroupMemberDecrease = onGroupMemberDecrease
 
+	customize.Logger = log.NewLogger("Cstm")
 	whitelist.Logger = log.NewLogger("MyID")
 	data.Logger = log.NewLogger("Data")
 }
@@ -104,7 +106,7 @@ const (
 	Intercept       = 1 //拦截消息
 )
 
-// 用于捕获所有panic，转换为酷Q的Fatal日志
+// 用于捕获所有panic，转换为酷Q日志
 func panicConvert() {
 	if v := recover(); v != nil {
 		// 在这里调用debug.Stack()获取调用栈

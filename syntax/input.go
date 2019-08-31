@@ -31,8 +31,11 @@ func GroupMsg(from int64, msg string, ret func(msg string)) bool {
 		case "ping": // ping指令
 			return ping.Ping(args, ret)
 
+		case "auth": // auth指令
+			return customize.Auth(args, from, ret)
+
 		default: // 自定义指令
-			return customize.Exec(cmd, args, from, ret)
+			return customize.Exec(args, from, ret)
 		}
 	}
 

@@ -40,10 +40,11 @@ var defaultFiles = map[string]string{
 
 GroupID = 123456789 # 游戏群群号
 # AdminID = 123456789 # 管理群群号（可选）
+# Administrators = [ 12345678910, 23456789101, 34567891011] # 设置管理员们（他们可以设置任何人的Level)
 
 [Database]
 Driver = "sqlite3" # 数据库类型（仅支持mysql和sqlite3）
-Source = "{{ join .AppDir "data.db"}}" # SQLite写法, 详细用法见https://github.com/mattn/go-sqlite3#dsn-examples
+Source = "{{ join .AppDir \"data.db\"}}" # SQLite写法, 详细用法见https://github.com/mattn/go-sqlite3#dsn-examples
 # Source = "用户:密码@tcp(地址:端口)/库名" # MySQL写法, 详细用法见https://github.com/go-sql-driver/mysql#dsn-data-source-name
 
 [Ping] # Ping工具配置
