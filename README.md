@@ -4,31 +4,35 @@
 本插件已在酷Q社区发布~
 https://cqp.cc/t/44736
 
-## 功能
-1. 白名单  
-群员在群内发送`MyID=<正版游戏名>`自助获取白名单，例如`MyID=Tnze`；
-群员更换账号时同样发送`MyID=<正版游戏名>`更新，例如`MyID=Xi_Xi_Mi`；
-群员退群时白名单将被自动取消。**MyID指令无需艾特机器人** 。
-2. Ping  
-群员在群内**艾特机器人** 并发送指令`ping`查询服务器状态，例如`@robot ping`，
-插件自己实现了MC PingAndList功能，不调用第三方API；
-群员可在ping后接第三方服务器地址，例如`@robot play.miaoscraft.cn`，
-则ping目标转至群员指定的服务器；
-群员可进一步指定服务器端口，有两种格式均可行：
-	- `@robot ping play.miaoscraft.cn:25565`
-	- `@robot ping play.miaoscraft.cn 25565`。
-3. 自定义指令  
-在配置文件中配置自定义指令，即可在Q群内执行预先配置好的命令；命令可根据需要调节权限。
-例如配置了查看tps的自定义指令后可发送`@robot tps`指令查看服务器tps（需要服务器支持）。
-```toml
-[Cmd.tps]		# 指令触发名
-Level = 0 		# 权限0表示任何人均可以执行
-Command = "tps"		# 实际执行的命令
-```
-## 配置文件
-请务必修改配置文件conf.toml，填写RCON服务器密码等相关信息
+用法与配置请查看[Wiki](https://github.com/miaoscraft/SiS/wiki)
 
-## 数据接口
-默认使用SQLite数据库，还可以配置为使用MySQL。
-支持`toml`配置文件格式，通俗易懂类似`.ini`。  
-通过RCON协议与MC服务器通信，同时支持官方服务器与Bukkit系列，无需服务器插件。
+## 功能
+本插件适用于包括原版服务端在内的各种MC服务端。
+1. 白名单  
+群员可以自助获得白名单，游戏名经Mojang服务器验证后通过RCON发送到游戏服务器进行添加。  
+玩家主动或被动退群时，将被自动从白名单中移除。
+2. Ping  
+可在群内ping游戏服务器，查看延迟以及在线玩家。  
+~~我们经常拿来判断是自己网络不好还是服务器崩了~~。
+3. 自定义指令  
+在配置文件中预先写好指令，然后在Q群内调用。  
+拥有简单明了的权限系统用于保证命令不被恶意执行。
+
+## 鸣谢
+感谢他们⬇️对SiS的付出
+
+[Tnze](https://github.com/Tnze)（开发者）  
+[fcc](https://github.com/Amazefcc233)（测试，提示语优化，文案，社区发布，装可爱）  
+[柏喵](https://github.com/MscBaiMeow)（提示语优化，服主）  
+[Miaoscraft](https://miaoscraft.cn)（感谢相遇）  
+
+## 依赖
+感谢下列项目，没有它们SiS不将诞生
+
+- Go语言 https://golang.org
+- MC协议文档 https://wiki.vg
+- go-mc库 https://github.com/Tnze/go-mc
+- 酷Q插件SDK https://github.com/Tnze/CoolQ-Golang-SDK
+- SQLite驱动 https://github.com/mattn/go-sqlite3
+- MySQL驱动 https://github.com/go-sql-driver/mysql
+- Toml配置文件 https://github.com/BurntSushi/toml
