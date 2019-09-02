@@ -1,5 +1,6 @@
 # SiS
-基于酷Q的MC服务器综合管理插件，涵盖了非常方便的许多功能。
+[![Build status](https://ci.appveyor.com/api/projects/status/5m4fip2k59kurfcn?svg=true)](https://ci.appveyor.com/project/Tnze/sis)  
+基于酷Q的MC服务器综合管理插件，主要提供白名单管理和状态查询(ping)功能。
 
 本插件已在酷Q社区发布~
 https://cqp.cc/t/44736
