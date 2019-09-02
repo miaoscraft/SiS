@@ -13,7 +13,7 @@ import (
 
 func MyID(qq int64, name string, ret func(msg string)) {
 	// 查询玩家名字和ID
-	name, id, err := getUUID(name)
+	Name, id, err := getUUID(name)
 	if err != nil {
 		Logger.Errorf("向Mojang查询玩家UUID失败: %v", err)
 		ret("我不要你觉得，我要我觉得" + name + "是个假名字")
@@ -38,11 +38,11 @@ func MyID(qq int64, name string, ret func(msg string)) {
 
 	onSuccess := func() error {
 		// 添加白名单
-		err = data.AddWhitelist(name)
+		err = data.AddWhitelist(Name)
 		if err != nil {
 			return fmt.Errorf("添加白名单失败: %v", err)
 		}
-		Logger.Infof("添加白名单%q成功", name)
+		Logger.Infof("添加白名单%q成功", Name)
 		return nil
 	}
 
@@ -56,14 +56,14 @@ func MyID(qq int64, name string, ret func(msg string)) {
 
 	// 若owner是当前处理的用户则说明绑定成功，否则就是失败
 	if owner != qq {
-		if len(name) < 3 {
-			ret(fmt.Sprintf("白名单%s现在在[CQ:at,qq=%d]手上", name, owner))
+		if len(Name) < 3 {
+			ret(fmt.Sprintf("白名单%s现在在[CQ:at,qq=%d]手上", Name, owner))
 		} else {
-			ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n你要这个吗？\n\n{\\__/}\n( • - •)\n%s< \\\n这是[CQ:at,qq=%d]的", name, name[len(name)-3:], owner))
+			ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n你要这个吗？\n\n{\\__/}\n( • - •)\n%s< \\\n这是[CQ:at,qq=%d]的", Name, Name[len(Name)-3:], owner))
 		}
 		return
 	}
-	ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n呐，你的白名单", name))
+	ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n呐，你的白名单", Name))
 }
 
 func RemoveWhitelist(qq int64, ret func(msg string)) {
