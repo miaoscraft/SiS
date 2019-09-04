@@ -14,7 +14,7 @@ var (
 	CmdPrefix string
 )
 
-var expMyID = regexp.MustCompile(`^\s*(?i)MyID\s*[=＝]\s*([[:word:]]{3,16})\s*$`)
+var expMyID = regexp.MustCompile(`^\s*(?i)MyID\s*[=＝]\s*([0-9A-Za-z_]{3,16})\s*$`)
 
 // GroupMsg 处理从游戏群接收到的消息，若为合法命令则进行相应的处理。并发安全
 // 返回值指示是否拦截本消息

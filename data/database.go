@@ -177,8 +177,8 @@ func UnsetWhitelist(QQ int64, onHas func(ID uuid.UUID) error) error {
 	return nil
 }
 
-// GetWhitelist 从数据库读取玩家绑定的ID，若没有绑定ID则返回uuid.Nil
-func GetWhitelist(QQ int64) (id uuid.UUID, err error) {
+// GetWhitelistByQQ 从数据库读取玩家绑定的ID，若没有绑定ID则返回uuid.Nil
+func GetWhitelistByQQ(QQ int64) (id uuid.UUID, err error) {
 	err = db.QueryRow("SELECT UUID FROM users WHERE QQ=?", QQ).Scan(&id)
 	if err == sql.ErrNoRows {
 		return uuid.Nil, nil
@@ -190,33 +190,24 @@ func GetWhitelist(QQ int64) (id uuid.UUID, err error) {
 	return
 }
 
-// GetLevel 获取某人的权限等级
-func GetLevel(QQ int64) (level int64, err error) {
-	var tx *sql.Tx
-	tx, err = db.Begin()
-	if err != nil {
-		err = fmt.Errorf("数据库开始事务失败: %v", err)
-		return
+// GetWhitelistByUUID 从数据库读取绑定ID的玩家，若ID没有被绑定则则返回0
+func GetWhitelistByUUID(ID uuid.UUID) (qq int64, err error) {
+	err = db.QueryRow("SELECT QQ FROM users WHERE UUID=?", ID[:]).Scan(&qq)
+	if err == sql.ErrNoRows {
+		return qq, nil
 	}
 
-	defer func() {
-		rbErr := tx.Rollback()
-		if rbErr != nil {
-			if err != nil {
-				err = fmt.Errorf("%v, 且数据库回滚失败: %v", err, rbErr)
-			} else {
-				err = fmt.Errorf("数据库回滚失败: %v", rbErr)
-			}
-		}
-	}()
+	return
+}
 
-	err = tx.QueryRow("SELECT Level FROM auths WHERE QQ=?", QQ).Scan(&level)
+// GetLevel 获取某人的权限等级
+func GetLevel(QQ int64) (level int64, err error) {
+	err = db.QueryRow("SELECT Level FROM auths WHERE QQ=?", QQ).Scan(&level)
 	if err == sql.ErrNoRows {
 		level = 0
 		err = nil
 	} else if err != nil {
 		err = fmt.Errorf("查询Level失败: %v", err)
-		return
 	}
 
 	return
