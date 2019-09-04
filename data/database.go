@@ -177,6 +177,19 @@ func UnsetWhitelist(QQ int64, onHas func(ID uuid.UUID) error) error {
 	return nil
 }
 
+// GetWhitelist 从数据库读取玩家绑定的ID，若没有绑定ID则返回uuid.Nil
+func GetWhitelist(QQ int64) (id uuid.UUID, err error) {
+	err = db.QueryRow("SELECT UUID FROM users WHERE QQ=?", QQ).Scan(&id)
+	if err == sql.ErrNoRows {
+		return uuid.Nil, nil
+	}
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return
+}
+
 // GetLevel 获取某人的权限等级
 func GetLevel(QQ int64) (level int64, err error) {
 	var tx *sql.Tx

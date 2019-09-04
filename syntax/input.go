@@ -19,6 +19,12 @@ var expMyID = regexp.MustCompile(`^\s*(?i)MyID\s*[=＝]\s*([[:word:]]{3,16})\s*$
 // GroupMsg 处理从游戏群接收到的消息，若为合法命令则进行相应的处理。并发安全
 // 返回值指示是否拦截本消息
 func GroupMsg(from int64, msg string, ret func(msg string)) bool {
+	// 识别MyID指令
+	if match := expMyID.FindStringSubmatch(msg); len(match) == 2 {
+		whitelist.MyID(from, match[1], ret)
+		return true
+	}
+
 	// 识别@指令
 	if strings.HasPrefix(msg, CmdPrefix) {
 		cmd := msg[len(CmdPrefix):]
@@ -34,15 +40,12 @@ func GroupMsg(from int64, msg string, ret func(msg string)) bool {
 		case "auth": // auth指令
 			return customize.Auth(args, from, ret)
 
+		case "info": // 白名单查询指令
+			return whitelist.Info(args, from, ret)
+
 		default: // 自定义指令
 			return customize.Exec(args, from, ret)
 		}
-	}
-
-	// 识别MyID指令
-	if match := expMyID.FindStringSubmatch(msg); len(match) == 2 {
-		whitelist.MyID(from, match[1], ret)
-		return true
 	}
 
 	return false
