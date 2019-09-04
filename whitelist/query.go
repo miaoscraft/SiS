@@ -70,9 +70,13 @@ func nameInfo(targetName string, ret func(string)) {
 	qq, err := data.GetWhitelistByUUID(id)
 	if err != nil {
 		Logger.Errorf("数据库查询QQ失败: %v", err)
-		ret(fmt.Sprintf("没人绑定%s哟~", name))
+		ret("数据库出问题了(つД`)ノ")
 		return
 	}
 
-	ret(fmt.Sprintf("啊呐占用%s的是%d哟", name, qq))
+	if qq == 0 {
+		ret(fmt.Sprintf("没人绑定%s哟~", name))
+	} else {
+		ret(fmt.Sprintf("啊呐占用%s的是%d哟", name, qq))
+	}
 }
