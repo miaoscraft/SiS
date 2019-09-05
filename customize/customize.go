@@ -48,41 +48,65 @@ func Exec(args []string, fromQQ int64, ret func(string)) bool {
 
 func Auth(args []string, fromQQ int64, ret func(string)) bool {
 	// args: ["auth", "@Member" | "QQ-num", "level"]
-	if len(args) < 2 {
+	if len(args) < 2 || args[0] != "auth" {
 		return false
 	}
-	var target int64
-	var err error
+
 	// 解析目标QQ
-	if _, err = fmt.Sscanf(args[1], "[CQ:at,qq=%d]", &target); err == nil {
+	var target int64
+	if _, err := fmt.Sscanf(args[1], "[CQ:at,qq=%d]", &target); err == nil {
 	} else if target, err = strconv.ParseInt(args[1], 10, 64); err == nil {
 	} else {
 		return false
 	}
 
-	if len(args) < 3 { // 查询权限而非设置
-		level, err := data.GetLevel(target)
-		if err != nil {
-			Logger.Errorf("设置权限出错: %v", err)
-			ret("查询时出现了问题(つД`)ノ")
-		} else {
-			ret(fmt.Sprintf("%d( ̀⌄ ́)", level))
-		}
-		return true
-	}
+	if len(args) < 3 { // auth查询
+		return getAuth(fromQQ, target, ret)
+	} // auth设置
 
 	// 解析权限等级
-	var level int64
-	if level, err = strconv.ParseInt(args[2], 10, 64); err != nil {
+	level, err := strconv.ParseInt(args[2], 10, 64)
+	if err != nil {
 		return false
 	}
+	return setAuth(fromQQ, target, level, ret)
+}
+
+func getAuth(from, target int64, ret func(string)) bool {
+	cmds, _ := data.Config.Cmd["auth"]
+	// 查询是否有auth查询权限
+	level, err := data.GetLevel(from)
+	if err != nil {
+		Logger.Errorf("获取权限出错: %v", err)
+		ret("当前没有办法验证权限呢")
+		return false
+	}
+	// 检查权限
+	if cmds.Level <= level {
+		level, err := data.GetLevel(target)
+		if err != nil {
+			Logger.Errorf("查询权限出错: %v", err)
+			ret("查询时出现了问题(つД`)ノ")
+		} else {
+			ret(fmt.Sprintf("(￣▽￣)~*%d", level))
+		}
+	} else {
+		//权限不足
+		ret("你不能够执行这个命令哦～")
+		return false
+	}
+
+	return true
+}
+
+func setAuth(from, targetQQ, targetLevel int64, ret func(string)) bool {
 	// 确认是否是超级管理员
 	for _, v := range data.Config.Administrators {
-		if v == fromQQ {
+		if v == from {
 			// 该用户属于最高管理员
-			Logger.Infof("将%d的权限设置为%d", target, level)
-			err = data.SetLevel(target, level)
-			if err != nil {
+			Logger.Infof("将%d的权限设置为%d", targetQQ, targetLevel)
+
+			if err := data.SetLevel(targetQQ, targetLevel); err != nil {
 				Logger.Errorf("设置权限出错: %v", err)
 				ret("这里出现了问题(つД`)ノ")
 			} else {
