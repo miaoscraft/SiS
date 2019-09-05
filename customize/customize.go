@@ -48,10 +48,10 @@ func Exec(args []string, fromQQ int64, ret func(string)) bool {
 
 func Auth(args []string, fromQQ int64, ret func(string)) bool {
 	// args: ["auth", "@Member" | "QQ-num", "level"]
-	if len(args) != 3 {
+	if len(args) < 2 {
 		return false
 	}
-	var target, level int64
+	var target int64
 	var err error
 	// 解析目标QQ
 	if _, err = fmt.Sscanf(args[1], "[CQ:at,qq=%d]", &target); err == nil {
@@ -59,7 +59,20 @@ func Auth(args []string, fromQQ int64, ret func(string)) bool {
 	} else {
 		return false
 	}
+
+	if len(args) < 3 { // 查询权限而非设置
+		level, err := data.GetLevel(target)
+		if err != nil {
+			Logger.Errorf("设置权限出错: %v", err)
+			ret("查询时出现了问题(つД`)ノ")
+		} else {
+			ret(fmt.Sprintf("%d( ̀⌄ ́)", level))
+		}
+		return true
+	}
+
 	// 解析权限等级
+	var level int64
 	if level, err = strconv.ParseInt(args[2], 10, 64); err != nil {
 		return false
 	}
