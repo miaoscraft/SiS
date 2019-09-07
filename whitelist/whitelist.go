@@ -16,7 +16,7 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	Name, id, err := getUUID(name)
 	if err != nil {
 		Logger.Errorf("向Mojang查询玩家UUID失败: %v", err)
-		ret("我不要你觉得，我要我觉得" + name + "是个假名字")
+		ret(fmt.Sprintf("捡到个纸团\n( ^ ω ^) \n≡⊃§⊂≡ \n打开看一眼\n( ^ ω ^)\n⊃|" + name + "|⊂\n不认识这个id呢\n( ^ ω ^) \n≡⊃§⊂≡\n \n§\n ¶\n　∩( ^ ω ^)"))
 		return
 	}
 
