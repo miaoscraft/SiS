@@ -155,25 +155,22 @@ func UnsetWhitelist(QQ int64, onHas func(ID uuid.UUID) error) error {
 		}
 	}()
 
-	rows, err := tx.Query("SELECT UUID FROM users WHERE QQ=?", QQ)
-	if err != nil {
+	var oldID uuid.UUID
+	err = tx.QueryRow("SELECT UUID FROM users WHERE QQ=?", QQ).Scan(&oldID)
+	if err == sql.ErrNoRows {
+		return nil // 没有数据
+	} else if err != nil {
 		return fmt.Errorf("数据库查询UUID失败: %v", err)
 	}
 
-	if rows.Next() {
-		var oldID uuid.UUID
-		if err := rows.Scan(&oldID); err != nil {
-			return fmt.Errorf("数据库读取旧UUID失败: %v", err)
-		}
-
-		if err := onHas(oldID); err != nil {
-			return err
-		}
-
-		if _, err := tx.Exec("DELETE FROM users WHERE QQ=?", QQ); err != nil {
-			return fmt.Errorf("数据库删除UUID失败: %v", err)
-		}
+	if err := onHas(oldID); err != nil {
+		return err
 	}
+
+	if _, err := tx.Exec("DELETE FROM users WHERE QQ=?", QQ); err != nil {
+		return fmt.Errorf("数据库删除UUID失败: %v", err)
+	}
+
 	return nil
 }
 
