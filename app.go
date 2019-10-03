@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"runtime/debug"
+
 	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 	"github.com/miaoscraft/SiS/customize"
 	"github.com/miaoscraft/SiS/data"
 	"github.com/miaoscraft/SiS/log"
 	"github.com/miaoscraft/SiS/syntax"
 	"github.com/miaoscraft/SiS/whitelist"
-	"runtime/debug"
 )
 
 //go:generate cqcfg -c .

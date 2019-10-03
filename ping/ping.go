@@ -4,11 +4,13 @@ package ping
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Tnze/go-mc/bot"
+	"net"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/Tnze/go-mc/bot"
 
 	"github.com/Tnze/go-mc/chat"
 	"github.com/google/uuid"
@@ -21,13 +23,19 @@ func Ping(args []string, ret func(msg string)) bool {
 		delay time.Duration
 		err   error
 	)
+	addr, port := getAddr(args)
+	//SRV解析
+	if _, SRV, err := net.LookupSRV("minecraft", "tcp", addr); len(SRV) != 0 && err == nil {
+		addr = SRV[0].Target
+		port = int(SRV[0].Port)
+	}
 	if d := data.Config.Ping.Timeout.Duration; d > 0 {
 		//启用Timeout
-		addr, port := getAddr(args)
+
 		resp, delay, err = bot.PingAndListTimeout(addr, port, d)
 	} else {
 		//禁用Timeout
-		resp, delay, err = bot.PingAndList(getAddr(args))
+		resp, delay, err = bot.PingAndList(addr, port)
 	}
 	if err != nil {
 		ret(fmt.Sprintf("嘶...请求失败惹！: %v", err))

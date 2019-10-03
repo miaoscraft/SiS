@@ -1,7 +1,5 @@
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/Tnze/CoolQ-Golang-SDK v0.0.0-20190904035601-dae5871b9137 h1:zohiJvBKrYvf6XHGhGJCaF/8kgWV/mg5QZ59ppdz/Kg=
-github.com/Tnze/CoolQ-Golang-SDK v0.0.0-20190904035601-dae5871b9137/go.mod h1:XIWgI6JgLDdHQVN7a2Zegsp5ucwP071+8enN2emd0zg=
 github.com/Tnze/CoolQ-Golang-SDK v0.0.0-20190904052201-f9669df4659d h1:qOE0kDCTNnIg7CsyfpLCl5mJuMKo8rLwxZNGVqOQWNY=
 github.com/Tnze/CoolQ-Golang-SDK v0.0.0-20190904052201-f9669df4659d/go.mod h1:XIWgI6JgLDdHQVN7a2Zegsp5ucwP071+8enN2emd0zg=
 github.com/Tnze/go-mc v1.14.4-0.20190829075543-323dc15eecf9 h1:IWZDKzEhmEKMHuMLAKxkp85I1FCqyNEsMbn59C70t70=
