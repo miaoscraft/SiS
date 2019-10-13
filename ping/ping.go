@@ -24,14 +24,15 @@ func Ping(args []string, ret func(msg string)) bool {
 		err   error
 	)
 	addr, port := getAddr(args)
+
 	//SRV解析
 	if _, SRV, err := net.LookupSRV("minecraft", "tcp", addr); len(SRV) != 0 && err == nil {
 		addr = SRV[0].Target
 		port = int(SRV[0].Port)
 	}
+
 	if d := data.Config.Ping.Timeout.Duration; d > 0 {
 		//启用Timeout
-
 		resp, delay, err = bot.PingAndListTimeout(addr, port, d)
 	} else {
 		//禁用Timeout
@@ -48,18 +49,11 @@ func Ping(args []string, ret func(msg string)) bool {
 		ret(fmt.Sprintf("嘶...解码失败惹！: %v", err))
 		return true
 	}
+
 	// 延迟用手动填进去
 	s.Delay = delay
-	//CQ码转义
-	des := s.Description.ClearString()
-	strings.Replace(des, "&", "&amp", -1)
-	strings.Replace(des, "[", "&#91", -1)
-	strings.Replace(des, "]", "&#93", -1)
-	s.Description = chat.Message{
-		Text: des,
-	}
-	ret(s.String())
 
+	ret(s.String())
 	return true
 }
 
@@ -121,14 +115,23 @@ type status struct {
 
 var tmp = template.Must(template.
 	New("PingRet").
+	Funcs(CQCodeUtil).
 	Parse(`喵哈喽～
-服务器版本: [{{ .Version.Protocol }}] {{ .Version.Name }}
-Motd: {{ .Description.ClearString }}
-延迟: {{.Delay }}
+服务器版本: [{{ .Version.Protocol }}] {{ .Version.Name | escape }}
+Motd: {{ .Description.ClearString | escape }}
+延迟: {{ .Delay }}
 在线人数: {{ .Players.Online -}}/{{- .Players.Max }}
 玩家列表:
-{{ range .Players.Sample }}- [{{ .Name }}]
+{{ range .Players.Sample }}- [{{ .Name | escape }}]
 {{ end }}にゃ～`))
+
+var CQCodeUtil = template.FuncMap{
+	"escape": strings.NewReplacer(
+		"&", "&amp;",
+		"[", "&#91;",
+		"]", "&#93;",
+	).Replace,
+}
 
 func (s status) String() string {
 	var sb strings.Builder
