@@ -10,8 +10,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/Tnze/CoolQ-Golang-SDK/cqp/util"
 	"github.com/Tnze/go-mc/bot"
-
 	"github.com/Tnze/go-mc/chat"
 	"github.com/google/uuid"
 	"github.com/miaoscraft/SiS/data"
@@ -126,11 +126,7 @@ Motd: {{ .Description.ClearString | escape }}
 {{ end }}にゃ～`))
 
 var CQCodeUtil = template.FuncMap{
-	"escape": strings.NewReplacer(
-		"&", "&amp;",
-		"[", "&#91;",
-		"]", "&#93;",
-	).Replace,
+	"escape": util.Escape,
 }
 
 func (s status) String() string {
