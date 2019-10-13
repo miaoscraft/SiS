@@ -50,7 +50,14 @@ func Ping(args []string, ret func(msg string)) bool {
 	}
 	// 延迟用手动填进去
 	s.Delay = delay
-
+	//CQ码转义
+	des := s.Description.ClearString()
+	strings.Replace(des, "&", "&amp", -1)
+	strings.Replace(des, "[", "&#91", -1)
+	strings.Replace(des, "]", "&#93", -1)
+	s.Description = chat.Message{
+		Text: des,
+	}
 	ret(s.String())
 
 	return true
