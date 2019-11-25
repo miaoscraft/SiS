@@ -60,6 +60,7 @@ Password = "rcon_password" #服务器RCON密码，server.properties文件里的r
 Level = 0 # 执行该命令所需等级
 Command = "tps" # 执行时实际发送的命令
 # Silent = true # 禁用命令回显
+# AllowArgs = true # 允许执行时附加参数（试验性功能，请自行考察安全性后慎重开启）
 
 [Cmd."帮助"] # 中文命令需要引号，命令不可包含空格
 Level = 0

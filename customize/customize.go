@@ -4,6 +4,7 @@ package customize
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/miaoscraft/SiS/data"
 )
@@ -26,8 +27,14 @@ func Exec(args []string, fromQQ int64, ret func(string)) bool {
 	// 权限确认
 	if cmds.Level <= level {
 		Logger.Infof("成员%d以等级%d执行指令%q", fromQQ, level, cmds.Command)
+
+		rconCmd := cmds.Command
+		if cmds.AllowArgs {
+			rconCmd += strings.Join(args[1:], " ")
+		}
+
 		// 执行指令
-		resp, err := data.RCONCmd(cmds.Command)
+		resp, err := data.RCONCmd(rconCmd)
 		if err != nil {
 			Logger.Errorf("执行命令出错: %v", err)
 			ret("服务器被玩坏啦？！")

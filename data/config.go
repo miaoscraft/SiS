@@ -78,9 +78,10 @@ var Config struct {
 
 	// 自定义命令
 	Cmd map[string]struct {
-		Level   int64
-		Command string
-		Silent  bool
+		Level     int64  // 所需权限
+		Command   string // 指令本身
+		Silent    bool   // 是否不回显
+		AllowArgs bool   // 是否允许使用参数
 	}
 }
 
