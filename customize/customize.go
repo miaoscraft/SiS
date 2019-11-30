@@ -30,7 +30,7 @@ func Exec(args []string, fromQQ int64, ret func(string)) bool {
 
 		rconCmd := cmds.Command
 		if cmds.AllowArgs {
-			rconCmd += strings.Join(args[1:], " ")
+			rconCmd += " " + strings.Join(args[1:], " ")
 		}
 
 		// 执行指令
