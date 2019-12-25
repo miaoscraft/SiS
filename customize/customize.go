@@ -34,15 +34,14 @@ func Exec(args []string, fromQQ int64, ret func(string)) bool {
 		}
 
 		// 执行指令
-		resp, err := data.RCONCmd(rconCmd)
+		var subret func(string)
+		if !cmds.Silent {
+			subret = ret
+		}
+		err := data.RCONCmd(rconCmd, subret)
 		if err != nil {
 			Logger.Errorf("执行命令出错: %v", err)
 			ret("服务器被玩坏啦？！")
-		}
-
-		// 返回结果
-		if !cmds.Silent {
-			ret(resp)
 		}
 		return true
 
