@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
+	"github.com/Tnze/CoolQ-Golang-SDK/v2/cqp"
 	"github.com/miaoscraft/SiS/customize"
 	"github.com/miaoscraft/SiS/data"
 	"github.com/miaoscraft/SiS/log"
@@ -17,7 +17,7 @@ import (
 // cqp: 版本: 1.2.2:0
 // cqp: 作者: Tnze
 // cqp: 简介: Minecraft服务器综合管理器
-func main() { /*空*/ }
+func main() { cqp.Main() }
 
 func init() {
 	cqp.AppID = "cn.miaoscraft.sis"
