@@ -1,7 +1,7 @@
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/Tnze/CoolQ-Golang-SDK v1.1.0 h1:j4OyH5dn/kGsqaD+94NJ5pSCn7Xfl1PXNyGSbXxIXGw=
-github.com/Tnze/CoolQ-Golang-SDK v1.1.0/go.mod h1:e0wTTiIAcKLmr4JHTUHOo0dLzctmhNE1m3HhNHHGQLA=
+github.com/Tnze/CoolQ-Golang-SDK/v2 v2.0.1 h1:wCBJZVqcXSTsWlkvnA+/jM1SkXoAPnU5Q8OQBXRrAAQ=
+github.com/Tnze/CoolQ-Golang-SDK/v2 v2.0.1/go.mod h1:o+TitO7jwCTftdnOD+uAJiUrom7NI4wTtyCJu7bFbSM=
 github.com/Tnze/go-mc v1.14.5-0.20191223052559-4d36dc2b29da h1:QeND1SH7ydbDiRWQgll086kT3O7A+lJoaz4CPfyEXyI=
 github.com/Tnze/go-mc v1.14.5-0.20191223052559-4d36dc2b29da/go.mod h1:ZQpDcppzIn7X37rsk39CAL4C7nkmu4sxWvDpcy9pncc=
 github.com/fatih/pool v3.0.0+incompatible h1:3xXzI/t5o6aEU/R+xe7ed44CTw41lV3oB0gB5pNXS5U=

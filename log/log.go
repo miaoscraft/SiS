@@ -2,7 +2,7 @@ package log
 
 import (
 	"fmt"
-	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
+	"github.com/Tnze/CoolQ-Golang-SDK/v2/cqp"
 )
 
 type Logger struct {

@@ -2,19 +2,21 @@ package main
 
 import (
 	"fmt"
-	"runtime/debug"
-
-	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
+	"github.com/Tnze/CoolQ-Golang-SDK/v2/cqp"
+	"github.com/google/uuid"
 	"github.com/miaoscraft/SiS/customize"
 	"github.com/miaoscraft/SiS/data"
 	"github.com/miaoscraft/SiS/log"
 	"github.com/miaoscraft/SiS/syntax"
 	"github.com/miaoscraft/SiS/whitelist"
+	"net/http"
+	"net/url"
+	"regexp"
 )
 
 //go:generate cqcfg -c .
 // cqp: 名称: SiS
-// cqp: 版本: 1.2.2:0
+// cqp: 版本: 1.3.0:0
 // cqp: 作者: Tnze
 // cqp: 简介: Minecraft服务器综合管理器
 func main() { /*空*/ }
@@ -27,6 +29,7 @@ func init() {
 
 	cqp.GroupMsg = onGroupMsg
 	cqp.GroupMemberDecrease = onGroupMemberDecrease
+	cqp.GroupRequest = onGroupRequest
 
 	customize.Logger = log.NewLogger("Cstm")
 	whitelist.Logger = log.NewLogger("MyID")
@@ -37,8 +40,6 @@ var Logger = log.NewLogger("Main")
 
 // 插件生命周期开始
 func onStart() int32 {
-	defer panicConvert()
-
 	// 连接数据源
 	err := data.Init(cqp.GetAppDir())
 	if err != nil {
@@ -53,8 +54,6 @@ func onStart() int32 {
 
 // 插件生命周期结束
 func onStop() int32 {
-	defer panicConvert()
-
 	err := data.Close()
 	if err != nil {
 		Logger.Errorf("释放数据源失败: %v", err)
@@ -64,8 +63,6 @@ func onStop() int32 {
 
 // 群消息事件
 func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, msg string, font int32) int32 {
-	defer panicConvert()
-
 	if fromQQ == 80000000 { // 忽略匿名
 		return Ignore
 	}
@@ -88,8 +85,6 @@ func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, ms
 
 // 群成员减少事件
 func onGroupMemberDecrease(subType, sendTime int32, fromGroup, fromQQ, beingOperateQQ int64) int32 {
-	defer panicConvert()
-
 	retValue := Ignore
 	ret := func(resp string) {
 		cqp.SendGroupMsg(fromGroup, resp)
@@ -102,15 +97,68 @@ func onGroupMemberDecrease(subType, sendTime int32, fromGroup, fromQQ, beingOper
 	return retValue
 }
 
+// 入群请求事件
+func onGroupRequest(subType, sendTime int32, fromGroup, fromQQ int64, msg, respFlag string) int32 {
+	if !data.Config.DealWithGroupRequest.Enable || // 功能未启用
+		fromGroup != data.Config.GroupID || // 不是要管理的群
+		subType != 1 { // 不是他人要申请入群
+		return Ignore
+	}
+	Logger := log.NewLogger("DwGR")
+	if regexp.MustCompile(`[0-9A-Za-z_]{3,16}`).MatchString(msg) {
+		name, id, err := whitelist.GetUUID(msg)
+		if err != nil {
+			Logger.Infof("处理%d的入群请求，检查游戏名失败: %v", fromQQ, err)
+			return Ignore
+		}
+
+		if ok, err := checkRequest(name, id); err != nil {
+			Logger.Errorf("服务器检查出错: %v", err)
+			return Ignore
+		} else if !ok {
+			Logger.Infof("服务器拒绝%d作为%s入群: %v", fromQQ, name, err)
+			if data.Config.DealWithGroupRequest.CanReject {
+				cqp.SetGroupAddRequest2(respFlag, subType, Deny, "")
+				return Intercept
+			}
+			return Ignore
+		}
+		Logger.Infof("允许%d作为%s入群", fromQQ, name)
+		cqp.SetGroupAddRequest2(respFlag, subType, Allow, "")
+
+		ret := func(resp string) { cqp.SendGroupMsg(fromGroup, resp) }
+		whitelist.MyID(fromQQ, name, ret)
+		return Intercept
+	}
+	return Ignore
+}
+
+func checkRequest(name string, id uuid.UUID) (bool, error) {
+	if data.Config.DealWithGroupRequest.CheckURL == "" {
+		return true, nil
+	}
+	resp, err := http.PostForm(
+		data.Config.DealWithGroupRequest.CheckURL,
+		url.Values{
+			"Token": []string{data.Config.DealWithGroupRequest.Token},
+			"Name":  []string{name},
+			"UUID":  []string{id.String()},
+		},
+	)
+	if err != nil {
+		return false, fmt.Errorf("请求出错: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNoContent {
+		return true, nil
+	}
+	return false, nil
+}
+
 const (
 	Ignore    int32 = 0 //忽略消息
 	Intercept       = 1 //拦截消息
-)
 
-// 用于捕获所有panic，转换为酷Q日志
-func panicConvert() {
-	if v := recover(); v != nil {
-		// 在这里调用debug.Stack()获取调用栈
-		Logger.Errorf("%v\n%s", v, debug.Stack())
-	}
-}
+	Allow = 1 // 允许进群
+	Deny  = 2 // 拒绝进群
+)

@@ -60,7 +60,7 @@ func qqInfo(targetQQ int64, ret func(string)) {
 }
 
 func nameInfo(targetName string, ret func(string)) {
-	name, id, err := getUUID(targetName)
+	name, id, err := GetUUID(targetName)
 	if err != nil {
 		Logger.Errorf("查询UUID失败: %v", err)
 		ret("查无此人")

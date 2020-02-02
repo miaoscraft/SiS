@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/Tnze/CoolQ-Golang-SDK v1.1.0
+	github.com/Tnze/CoolQ-Golang-SDK/v2 v2.0.1
 	github.com/Tnze/go-mc v1.14.5-0.20191223052559-4d36dc2b29da
 	github.com/fatih/pool v3.0.0+incompatible
 	github.com/go-sql-driver/mysql v1.4.1

@@ -13,7 +13,7 @@ import (
 
 func MyID(qq int64, name string, ret func(msg string)) {
 	// 查询玩家名字和ID
-	Name, id, err := getUUID(name)
+	Name, id, err := GetUUID(name)
 	if err != nil {
 		Logger.Errorf("向Mojang查询玩家UUID失败: %v", err)
 		ret(fmt.Sprintf("捡到个纸团\n( ^ ω ^) \n≡⊃§⊂≡ \n打开看一眼\n( ^ ω ^)\n⊃|" + name + "|⊂\n不认识这个id呢\n( ^ ω ^) \n≡⊃§⊂≡\n \n§\n ¶\n　∩( ^ ω ^)"))
@@ -91,8 +91,8 @@ func RemoveWhitelist(qq int64, ret func(msg string)) {
 	}
 }
 
-// getUUID 查询玩家的UUID
-func getUUID(name string) (string, uuid.UUID, error) {
+// GetUUID 查询玩家的UUID
+func GetUUID(name string) (string, uuid.UUID, error) {
 	var id uuid.UUID
 
 	// 发送请求

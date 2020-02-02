@@ -58,6 +58,13 @@ var Config struct {
 	AdminID int64
 	// 管理员
 	Administrators []int64
+	// 处理进群请求
+	DealWithGroupRequest struct {
+		Enable    bool
+		CanReject bool
+		CheckURL  string
+		Token     string
+	}
 
 	// 数据库配置
 	Database struct {
