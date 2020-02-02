@@ -2,6 +2,7 @@
 .idea/
 
 cqcfg.exe
+.DS_Store
 
 app.dll
 app.json
