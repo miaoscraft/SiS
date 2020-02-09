@@ -16,7 +16,7 @@ import (
 
 //go:generate cqcfg -c .
 // cqp: 名称: SiS
-// cqp: 版本: 1.3.0:0
+// cqp: 版本: 1.3.1:0
 // cqp: 作者: Tnze
 // cqp: 简介: Minecraft服务器综合管理器
 func main() { /*空*/ }
@@ -105,11 +105,11 @@ func onGroupRequest(subType, sendTime int32, fromGroup, fromQQ int64, msg, respF
 		return Ignore
 	}
 	Logger := log.NewLogger("DwGR")
-	if regexp.MustCompile(`[0-9A-Za-z_]{3,16}`).MatchString(msg) {
-		name, id, err := whitelist.GetUUID(msg)
+	for _, name := range regexp.MustCompile(`[0-9A-Za-z_]{3,16}`).FindAllString(msg, 3) {
+		name, id, err := whitelist.GetUUID(name)
 		if err != nil {
 			Logger.Infof("处理%d的入群请求，检查游戏名失败: %v", fromQQ, err)
-			return Ignore
+			continue
 		}
 
 		if ok, err := checkRequest(name, id); err != nil {
