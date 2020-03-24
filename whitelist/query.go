@@ -13,34 +13,28 @@ var expName = regexp.MustCompile(`^([0-9A-Za-z_]{3,16})$`)            // 匹配�
 
 func Info(args []string, fromQQ int64, ret func(string)) bool {
 	// 找出当前想查询的人的QQ
-	var target int64
 	switch len(args) {
 	case 1:
-		target = fromQQ
+		qqInfo(fromQQ, ret)
+		return true
 	case 2:
 		if sms := expQQ.FindStringSubmatch(args[1]); len(sms) == 3 { // 匹配一个QQ或At
 			for _, sm := range sms[1:3] { // [3]sms中后两项有一项为空，另一项为QQ
-				if sm != "" {
-					qq, err := strconv.ParseInt(sm, 10, 64)
-					if err != nil {
-						// 不可能执行到这个位置，因为正则表达式已经把非数字过滤掉了
-						panic(fmt.Errorf("解析命令中的QQ:%q出错: %v", sm[1], err))
-					}
-					target = qq
-					break
+				qq, err := strconv.ParseInt(sm, 10, 64)
+				if err != nil {
+					continue
 				}
+				qqInfo(qq, ret)
+				return true
 			}
-
 		} else if sm := expName.FindStringSubmatch(args[1]); len(sm) == 2 { // 匹配一个玩家名
 			nameInfo(sm[1], ret)
 			return true
 		}
+		return false
 	default:
 		return false
 	}
-
-	qqInfo(target, ret)
-	return true
 }
 
 func qqInfo(targetQQ int64, ret func(string)) {
