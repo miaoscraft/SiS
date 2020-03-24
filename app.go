@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/Tnze/CoolQ-Golang-SDK/v2/cqp"
+	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 	"github.com/google/uuid"
 	"github.com/miaoscraft/SiS/customize"
 	"github.com/miaoscraft/SiS/data"
@@ -118,13 +118,13 @@ func onGroupRequest(subType, sendTime int32, fromGroup, fromQQ int64, msg, respF
 		} else if !ok {
 			Logger.Infof("服务器拒绝%d作为%s入群: %v", fromQQ, name, err)
 			if data.Config.DealWithGroupRequest.CanReject {
-				cqp.SetGroupAddRequest2(respFlag, subType, Deny, "")
+				cqp.SetGroupAddRequest(respFlag, subType, Deny, "")
 				return Intercept
 			}
 			return Ignore
 		}
 		Logger.Infof("允许%d作为%s入群", fromQQ, name)
-		cqp.SetGroupAddRequest2(respFlag, subType, Allow, "")
+		cqp.SetGroupAddRequest(respFlag, subType, Allow, "")
 
 		ret := func(resp string) { cqp.SendGroupMsg(fromGroup, resp) }
 		whitelist.MyID(fromQQ, name, ret)

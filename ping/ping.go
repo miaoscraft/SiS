@@ -10,7 +10,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/Tnze/CoolQ-Golang-SDK/v2/cqp/util"
+	"github.com/Tnze/CoolQ-Golang-SDK/cqp/util"
 	"github.com/Tnze/go-mc/bot"
 	"github.com/Tnze/go-mc/chat"
 	"github.com/google/uuid"
