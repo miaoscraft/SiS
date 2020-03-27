@@ -1,21 +1,61 @@
-:: 关闭控制台回显  
 @echo off
 
-:: 生成app.json
-go build github.com/Tnze/CoolQ-Golang-SDK/tools/cqcfg
-go generate
+:: SET DevDir=D:\CoolQ Pro\dev\cn.miaoscraft.sis
 
-:: 设置环境变量  
+echo Setting proxy
+SET GOPROXY=https://goproxy.cn
+
+echo Checking go installation...
+go version > nul
+IF ERRORLEVEL 1 (
+	echo Please install go first...
+	goto RETURN
+)
+
+echo Checking gcc installation...
+gcc --version > nul
+IF ERRORLEVEL 1 (
+	echo Please install gcc first...
+	goto RETURN
+)
+
+echo Checking cqcfg installation...
+cqcfg -v
+IF ERRORLEVEL 1 (
+	echo Install cqcfg...
+	go get github.com/Tnze/CoolQ-Golang-SDK/tools/cqcfg
+	IF ERRORLEVEL 1 (
+		echo Install cqcfg fail
+		goto RETURN
+	)
+)
+
+echo Generating app.json ...
+go generate
+IF ERRORLEVEL 1 (
+	echo Generate app.json fail
+	goto RETURN
+)
+echo.
+
+echo Setting env vars..
 SET CGO_LDFLAGS=-Wl,--kill-at
 SET CGO_ENABLED=1
 SET GOOS=windows
 SET GOARCH=386
-SET GOPROXY=https://goproxy.cn
 
-:: 编译app.dll
+echo Building app.dll ...
 go build -ldflags "-s -w" -buildmode=c-shared -o app.dll
+IF ERRORLEVEL 1 (pause) ELSE (echo Build success!)
 
-:: 如果设置了环境变量，则把app.dll和app.json复制到酷Q的dev文件夹
-R:: SET DevDir=D:\酷Q Pro\dev\cn.miaoscraft.sis
-if defined DevDir
-for %%f in (app.dll,app.json) do move %%f "%DevDir%\%%f" > nul
+if defined DevDir (
+    echo Copy app.dll amd app.json ...
+    for %%f in (app.dll,app.json) do move %%f "%DevDir%\%%f" > nul
+    IF ERRORLEVEL 1 pause
+)
+
+exit /B
+
+:RETURN
+pause
+exit /B
