@@ -16,7 +16,7 @@ import (
 
 //go:generate cqcfg -c .
 // cqp: 名称: SiS
-// cqp: 版本: 1.3.3:0
+// cqp: 版本: 1.3.4:1
 // cqp: 作者: Tnze
 // cqp: 简介: Minecraft服务器综合管理器
 func main() { /*空*/ }

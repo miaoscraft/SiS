@@ -1,55 +1,54 @@
 package data
 
 import (
+	"errors"
 	"github.com/Tnze/go-mc/chat"
 	mcnet "github.com/Tnze/go-mc/net"
-	"github.com/fatih/pool"
-	"math/rand"
-	"net"
 	"strings"
 	"time"
 )
 
-var rcon pool.Pool
+var rconDialer func() (mcnet.RCONClientConn, error)
 
-func openRCON(address, password string) (err error) {
-	rcon, err = pool.NewChannelPool(1, 5, func() (net.Conn, error) {
-		rcon, err := mcnet.DialRCON(address, password)
-		return rcon.(*mcnet.RCONConn).Conn, err
-	})
-	return
+func openRCON(address, password string) error {
+	rconDialer = func() (mcnet.RCONClientConn, error) {
+		return mcnet.DialRCON(address, password)
+	}
+	return nil
 }
 
 // RCONCmd 执行RCON命令，断线时尝试重连一次
 func RCONCmd(cmd string, ret func(string)) error {
 	var r *mcnet.RCONConn
 	for {
-		conn, err := rcon.Get()
+		if rconDialer == nil {
+			return errors.New("RCON未设置")
+		}
+		conn, err := rconDialer()
 		if err != nil {
 			return err
 		}
-		r = &mcnet.RCONConn{Conn: conn, ReqID: rand.Int31()}
+		r = conn.(*mcnet.RCONConn)
 
 		err = r.Cmd(cmd)
 		if err == nil {
 			break
 		}
-		Logger.Errorf("rcon执行失败: %v", err)
-		if pc, ok := r.Conn.(*pool.PoolConn); ok {
-			// close the underlying connection
-			pc.MarkUnusable()
-			pc.Close()
-		}
+		Logger.Errorf("RCON执行失败: %v", err)
 	}
 	go func() {
 		defer r.Close()
+		tip := time.AfterFunc(time.Second, func() {
+			ret("正在努力发送指令噢，请稍后~")
+		})
 		for ret != nil {
-			_ = r.SetWriteDeadline(time.Now().Add(time.Second * 10))
+			_ = r.SetDeadline(time.Now().Add(time.Second * 10))
 			resp, err := r.Resp()
 			if err != nil {
-				Logger.Infof("停止转发rcon返回值: %v", err)
+				Logger.Infof("停止转发RCON返回值: %v", err)
 				return
 			}
+			tip.Stop() // 不再发送提示
 
 			Logger.Infof("RCON返回: %q", resp)
 			// 过滤掉末尾换行符、空格和零字符，过滤§格式字符串
