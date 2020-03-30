@@ -4,8 +4,6 @@ github.com/Tnze/CoolQ-Golang-SDK v1.2.0 h1:0vnuZCFRd3ufSnZd/6sveqmlamIMm3Bnr8M/7
 github.com/Tnze/CoolQ-Golang-SDK v1.2.0/go.mod h1:e0wTTiIAcKLmr4JHTUHOo0dLzctmhNE1m3HhNHHGQLA=
 github.com/Tnze/go-mc v1.14.5-0.20200116045701-4370b6c3cd47 h1:aRALhhipxce+3LJGmp4mpB0xVmvH8mgEKz0jtLLBHTw=
 github.com/Tnze/go-mc v1.14.5-0.20200116045701-4370b6c3cd47/go.mod h1:ZQpDcppzIn7X37rsk39CAL4C7nkmu4sxWvDpcy9pncc=
-github.com/fatih/pool v3.0.0+incompatible h1:3xXzI/t5o6aEU/R+xe7ed44CTw41lV3oB0gB5pNXS5U=
-github.com/fatih/pool v3.0.0+incompatible/go.mod h1:v+kkrv3f2oJ1P9NHaKArMYdTVtNCwfR0DlXwnhA2L4k=
 github.com/go-sql-driver/mysql v1.4.1 h1:g24URVg0OFbNUTx9qqY1IRZ9D9z3iPyi5zKhQZpNwpA=
 github.com/go-sql-driver/mysql v1.4.1/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
 github.com/golang/protobuf v1.3.1 h1:YF8+flBXS5eO826T4nzqPrxfhQThhXl0YzfuUPu4SBg=
