@@ -40,6 +40,7 @@ echo.
 
 echo Setting env vars..
 SET CGO_LDFLAGS=-Wl,--kill-at
+SET CGO_CFLAGS=-static-libgcc -static
 SET CGO_ENABLED=1
 SET GOOS=windows
 SET GOARCH=386
