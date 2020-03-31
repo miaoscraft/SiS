@@ -57,5 +57,5 @@ if defined DevDir (
 exit /B
 
 :RETURN
-pause
+if not defined NOPAUSE pause
 exit /B
