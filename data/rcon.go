@@ -50,11 +50,11 @@ func RCONCmd(cmd string, ret func(string)) error {
 			_ = r.SetWriteDeadline(time.Now().Add(time.Second * 10))
 			resp, err := r.Resp()
 			if err != nil {
-				Logger.Infof("停止转发rcon返回值: %v", err)
+				Logger.Debugf("停止转发rcon返回值: %v", err)
 				return
 			}
 
-			Logger.Infof("RCON返回: %q", resp)
+			Logger.Debugf("RCON返回: %q", resp)
 			// 过滤掉末尾换行符、空格和零字符，过滤§格式字符串
 			resp = chat.Message{Text: strings.TrimRight(resp, " \000\n")}.ClearString()
 			ret(resp)
