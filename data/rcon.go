@@ -1,59 +1,60 @@
 package data
 
 import (
-	"errors"
 	"github.com/Tnze/go-mc/chat"
 	mcnet "github.com/Tnze/go-mc/net"
+	"github.com/fatih/pool"
+	"math/rand"
+	"net"
 	"strings"
 	"time"
 )
 
-var rconDialer func() (mcnet.RCONClientConn, error)
+var rcon pool.Pool
 
-func openRCON(address, password string) error {
-	rconDialer = func() (mcnet.RCONClientConn, error) {
-		return mcnet.DialRCON(address, password)
-	}
-	return nil
+func openRCON(address, password string) (err error) {
+	rcon, err = pool.NewChannelPool(1, 5, func() (net.Conn, error) {
+		rcon, err := mcnet.DialRCON(address, password)
+		return rcon.(*mcnet.RCONConn).Conn, err
+	})
+	return
 }
 
-// RCONCmd 执行RCON命令，每次都创建一个连接。
-// 当ret不为nil时，通过回调方式返回RCON执行结果，ret可能被调用多次。
+// RCONCmd 执行RCON命令，断线时尝试重连一次
 func RCONCmd(cmd string, ret func(string)) error {
 	var r *mcnet.RCONConn
+	for {
+		conn, err := rcon.Get()
+		if err != nil {
+			return err
+		}
+		r = &mcnet.RCONConn{Conn: conn, ReqID: rand.Int31()}
 
-	if rconDialer == nil {
-		return errors.New("RCON未设置")
+		err = r.Cmd(cmd)
+		if err == nil {
+			break
+		}
+		Logger.Errorf("rcon执行失败: %v", err)
+		if pc, ok := r.Conn.(*pool.PoolConn); ok {
+			// close the underlying connection
+			pc.MarkUnusable()
+			pc.Close()
+		}
 	}
-	conn, err := rconDialer()
-	if err != nil {
-		return err
-	}
-	r = conn.(*mcnet.RCONConn)
-
-	err = r.Cmd(cmd)
-	if err != nil {
-		return err
-	}
-
 	go func() {
 		defer r.Close()
 		if ret == nil {
 			return
 		}
-		tip := time.AfterFunc(time.Second, func() {
-			ret("正在努力发送指令噢，请稍后~")
-		})
-		for {
-			_ = r.SetDeadline(time.Now().Add(time.Second * 10))
+		for ret != nil {
+			_ = r.SetWriteDeadline(time.Now().Add(time.Second * 10))
 			resp, err := r.Resp()
 			if err != nil {
-				Logger.Debugf("停止转发RCON返回值: %v", err)
+				Logger.Infof("停止转发rcon返回值: %v", err)
 				return
 			}
-			tip.Stop() // 不再发送提示
 
-			Logger.Debugf("RCON返回: %q", resp)
+			Logger.Infof("RCON返回: %q", resp)
 			// 过滤掉末尾换行符、空格和零字符，过滤§格式字符串
 			resp = chat.Message{Text: strings.TrimRight(resp, " \000\n")}.ClearString()
 			ret(resp)
