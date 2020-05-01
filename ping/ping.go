@@ -135,5 +135,6 @@ func (s status) String() string {
 	if err != nil {
 		return fmt.Sprintf("似乎在渲染文字模版时出现了棘手的问题: %v", err)
 	}
-	return sb.String()
+	cleanStr, _ := chat.TransCtrlSeq(sb.String(), false)
+	return cleanStr
 }
