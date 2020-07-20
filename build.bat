@@ -23,7 +23,7 @@ echo Checking cqcfg installation...
 cqcfg -v
 IF ERRORLEVEL 1 (
 	echo Install cqcfg...
-	go get github.com/Tnze/CoolQ-Golang-SDK/tools/cqcfg
+	go get github.com/Tnze/CoolQ-Golang-SDK/tools/cqcfg@master
 	IF ERRORLEVEL 1 (
 		echo Install cqcfg fail
 		goto RETURN
@@ -40,13 +40,12 @@ echo.
 
 echo Setting env vars..
 SET CGO_LDFLAGS=-Wl,--kill-at
-SET CGO_CFLAGS=-static-libgcc -static
 SET CGO_ENABLED=1
 SET GOOS=windows
 SET GOARCH=386
 
 echo Building app.dll ...
-go build -ldflags "-s -w" -buildmode=c-shared -o app.dll
+go build -ldflags "-s -w" -buildmode=c-shared -ldflags "-extldflags ""-static""" -o app.dll
 IF ERRORLEVEL 1 (pause) ELSE (echo Build success!)
 
 if defined DevDir (
