@@ -3,6 +3,7 @@ package ping
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -23,37 +24,33 @@ func Ping(args []string, ret func(msg string)) bool {
 		delay time.Duration
 		err   error
 	)
-	addr, port := getAddr(args)
 
-	//SRV解析
-	if _, SRV, err := net.LookupSRV("minecraft", "tcp", addr); len(SRV) != 0 && err == nil {
-		addr = SRV[0].Target
-		port = int(SRV[0].Port)
+	addresses := getAddr(args)
+	statuses := make([]status, len(addresses))
+	for i, addr := range addresses {
+		if d := data.Config.Ping.Timeout.Duration; d > 0 {
+			//启用Timeout
+			resp, delay, err = bot.PingAndListTimeout(addr, d)
+		} else {
+			//禁用Timeout
+			resp, delay, err = bot.PingAndList(addr)
+		}
+		if err != nil {
+			ret(fmt.Sprintf("嘶...请求失败惹！: %v", err))
+			return true
+		}
+
+		err = json.Unmarshal(resp, &statuses[i])
+		if err != nil {
+			ret(fmt.Sprintf("嘶...解码失败惹！: %v", err))
+			return true
+		}
+
+		// 延迟用手动填进去
+		statuses[i].Delay = delay
+		statuses[i].Address = addr
 	}
-
-	if d := data.Config.Ping.Timeout.Duration; d > 0 {
-		//启用Timeout
-		resp, delay, err = bot.PingAndListTimeout(addr, port, d)
-	} else {
-		//禁用Timeout
-		resp, delay, err = bot.PingAndList(addr, port)
-	}
-	if err != nil {
-		ret(fmt.Sprintf("嘶...请求失败惹！: %v", err))
-		return true
-	}
-
-	var s status
-	err = json.Unmarshal(resp, &s)
-	if err != nil {
-		ret(fmt.Sprintf("嘶...解码失败惹！: %v", err))
-		return true
-	}
-
-	// 延迟用手动填进去
-	s.Delay = delay
-
-	ret(s.String())
+	ret(render(statuses))
 	return true
 }
 
@@ -62,36 +59,31 @@ func Ping(args []string, ret func(msg string)) bool {
 // 	[ "ping" "play.miaoscraft.cn" ]
 // 	[ "ping" "play.miaoscraft.cn:25565" ]
 // 	[ "ping" "play.miaoscraft.cn" "25565" ]
-func getAddr(args []string) (addr string, port int) {
+func getAddr(args []string) (addrs []string) {
 	args = args[1:] //去除第一个元素"ping"
-	// 默认值
-	addr = data.Config.Ping.DefaultServer
-	port = 25565
-
-	// 在第二个参数内寻找端口
-	if len(args) >= 2 {
-		if p, err := strconv.Atoi(args[1]); err == nil {
-			port = p
+	switch len(args) {
+	default: // len >= 2
+		return []string{net.JoinHostPort(args[0], args[1])}
+	case 0: // 默认值
+		args = append(args, data.Config.Ping.DefaultServer)
+		fallthrough
+	case 1:
+		var addrErr *net.AddrError
+		const missingPort = "missing port in address"
+		addr := args[0]
+		if _, _, err := net.SplitHostPort(addr); errors.As(err, &addrErr) && addrErr.Err == missingPort {
+			_, addrsSRV, err := net.LookupSRV("minecraft", "tcp", addr)
+			if err == nil && len(addrsSRV) > 0 {
+				for _, addrSRV := range addrsSRV {
+					addrs = append(addrs, net.JoinHostPort(addrSRV.Target, strconv.Itoa(int(addrSRV.Port))))
+				}
+				return
+			}
+			return []string{net.JoinHostPort(addr, "25565")}
+		} else {
+			return []string{addr}
 		}
 	}
-
-	// 如果有则加载第一个参数
-	if len(args) >= 1 {
-		addr = args[0]
-	}
-
-	// 在冒号后面寻找端口
-	f := strings.Split(addr, ":")
-	if len(f) >= 2 {
-		if p, err := strconv.Atoi(f[1]); err == nil {
-			port = p
-		}
-	}
-
-	// 冒号前面是地址
-	addr = f[0]
-
-	return addr, port
 }
 
 type status struct {
@@ -110,28 +102,29 @@ type status struct {
 	}
 	//favicon ignored
 
-	Delay time.Duration `json:"-"`
+	Address string        `json:"-"`
+	Delay   time.Duration `json:"-"`
 }
 
 var tmp = template.Must(template.
 	New("PingRet").
 	Funcs(CQCodeUtil).
-	Parse(`喵哈喽～
-服务器版本: [{{ .Version.Protocol }}] {{ .Version.Name | escape }}
+	Parse(`喵哈喽～{{ $list := .}}
+{{ with index . 0 }}服务器版本: [{{ .Version.Protocol }}] {{ .Version.Name | escape }}
 Motd: {{ .Description.ClearString | escape }}
-延迟: {{ .Delay }}
-在线人数: {{ .Players.Online -}}/{{- .Players.Max }}
+{{ range $index, $elem := $list }}延迟[{{ $index }}]: {{ .Delay }} - {{ .Address }}
+{{ end }}在线人数: {{ .Players.Online -}}/{{- .Players.Max }}
 玩家列表:
 {{ range .Players.Sample }}- [{{ .Name | escape }}]
-{{ end }}にゃ～`))
+{{ end }}{{ end }}にゃ～`))
 
 var CQCodeUtil = template.FuncMap{
 	"escape": util.Escape,
 }
 
-func (s status) String() string {
+func render(statuses []status) string {
 	var sb strings.Builder
-	err := tmp.Execute(&sb, s)
+	err := tmp.Execute(&sb, statuses)
 	if err != nil {
 		return fmt.Sprintf("似乎在渲染文字模版时出现了棘手的问题: %v", err)
 	}
