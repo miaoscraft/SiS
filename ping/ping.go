@@ -36,14 +36,14 @@ func Ping(args []string, ret func(msg string)) bool {
 			resp, delay, err = bot.PingAndList(addr)
 		}
 		if err != nil {
-			ret(fmt.Sprintf("嘶...请求失败惹！: %v", err))
-			return true
+			statuses[i].Error = err
+			continue
 		}
 
 		err = json.Unmarshal(resp, &statuses[i])
 		if err != nil {
-			ret(fmt.Sprintf("嘶...解码失败惹！: %v", err))
-			return true
+			statuses[i].Error = err
+			continue
 		}
 
 		// 延迟用手动填进去
@@ -104,6 +104,7 @@ type status struct {
 
 	Address string        `json:"-"`
 	Delay   time.Duration `json:"-"`
+	Error   error         `json:"-"`
 }
 
 var tmp = template.Must(template.
@@ -111,8 +112,8 @@ var tmp = template.Must(template.
 	Funcs(CQCodeUtil).
 	Parse(`喵哈喽～{{ $list := .}}
 {{ with index . 0 }}服务器版本: [{{ .Version.Protocol }}] {{ .Version.Name | escape }}
-Motd: {{ .Description.ClearString | escape }}
-{{ range $index, $elem := $list }}延迟[{{ $index }}]: {{ .Delay }} - {{ .Address }}
+每日消息: {{ .Description.ClearString | escape }}
+{{ range $index, $elem := $list }}延迟[{{ $index }}]: {{if .Error}}请求失败：{{ .Error }}{{ else }}{{ .Delay }}{{ end }} - {{ .Address }}
 {{ end }}在线人数: {{ .Players.Online -}}/{{- .Players.Max }}
 玩家列表:
 {{ range .Players.Sample }}- [{{ .Name | escape }}]
