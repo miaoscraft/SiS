@@ -1,24 +1,33 @@
 package log
 
 import (
-	"fmt"
-	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
+	"github.com/sirupsen/logrus"
 )
 
-type Logger struct {
-	Name string
+type Logger logrus.Entry
+
+//type Logger struct {
+//	Name string
+//}
+
+func NewLogger(name string) *Logger {
+	return (*Logger)(logrus.New().WithField("name", name))
 }
 
-func NewLogger(name string) *Logger { return &Logger{name} }
+func (l *Logger) Error(str string) { (*logrus.Entry)(l).Error(str) }
+func (l *Logger) Errorf(format string, args ...interface{}) {
+	(*logrus.Entry)(l).Errorf(format, args...)
+}
 
-func (l *Logger) Error(str string)                          { cqp.AddLog(cqp.Error, l.Name, str) }
-func (l *Logger) Errorf(format string, args ...interface{}) { l.Error(fmt.Sprintf(format, args...)) }
+func (l *Logger) Warning(str string) { (*logrus.Entry)(l).Warning(str) }
+func (l *Logger) Warningf(format string, args ...interface{}) {
+	(*logrus.Entry)(l).Warningf(format, args...)
+}
 
-func (l *Logger) Waring(str string)                          { cqp.AddLog(cqp.Warning, l.Name, str) }
-func (l *Logger) Waringf(format string, args ...interface{}) { l.Waring(fmt.Sprintf(format, args...)) }
+func (l *Logger) Info(str string)                          { (*logrus.Entry)(l).Info(str) }
+func (l *Logger) Infof(format string, args ...interface{}) { (*logrus.Entry)(l).Infof(format, args...) }
 
-func (l *Logger) Info(str string)                          { cqp.AddLog(cqp.Info, l.Name, str) }
-func (l *Logger) Infof(format string, args ...interface{}) { l.Info(fmt.Sprintf(format, args...)) }
-
-func (l *Logger) Debug(str string)                          { cqp.AddLog(cqp.Debug, l.Name, str) }
-func (l *Logger) Debugf(format string, args ...interface{}) { l.Debug(fmt.Sprintf(format, args...)) }
+func (l *Logger) Debug(str string) { (*logrus.Entry)(l).Debug(str) }
+func (l *Logger) Debugf(format string, args ...interface{}) {
+	(*logrus.Entry)(l).Debugf(format, args...)
+}

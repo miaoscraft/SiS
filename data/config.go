@@ -52,6 +52,9 @@ func Close() error {
 }
 
 var Config struct {
+	ZeroBot struct {
+		Host, Port, AccessToken string
+	}
 	// 游戏群
 	GroupID int64
 	// 管理群
@@ -110,7 +113,7 @@ func readConfig() error {
 
 	// 检查配置文件是否有多余数据，抛警告⚠️
 	if uk := md.Undecoded(); len(uk) > 0 {
-		Logger.Waringf("配置文件中有未知数据: %q", uk)
+		Logger.Warningf("配置文件中有未知数据: %q", uk)
 	}
 
 	// 替换文件路径Database中Source的文件路径

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/Tnze/CoolQ-Golang-SDK/cqp"
 	"github.com/google/uuid"
 	"github.com/miaoscraft/SiS/customize"
 	"github.com/miaoscraft/SiS/data"
@@ -12,24 +11,64 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+
+	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/driver"
 )
 
-//go:generate cqcfg -c .
 // cqp: 名称: SiS
 // cqp: 版本: 1.4.1:1
 // cqp: 作者: Tnze
 // cqp: 简介: Minecraft服务器综合管理器
-func main() { /*空*/ }
+func main() {
+	onStart()
+	zero.OnMessage(zero.OnlyGroup).
+		Handle(func(ctx *zero.Ctx) {
+			ret := func(resp string) {
+				ctx.Send(resp)
+			}
+			// 将登录账号载入命令解析器（用于识别@）
+			syntax.CmdPrefix = fmt.Sprintf("[CQ:at,qq=%d]", ctx.Event.SelfID)
+			onGroupMsg(
+				ctx.Event.GroupID,
+				ctx.Event.Sender.ID,
+				ctx.Event.Message.CQString(),
+				ret,
+			)
+		})
+	zero.OnNotice(func(ctx *zero.Ctx) bool {
+		return ctx.Event.PostType == "notice" && ctx.Event.NoticeType == "group_decrease"
+	}).Handle(func(ctx *zero.Ctx) {
+		ret := func(resp string) {
+			ctx.Send(resp)
+		}
+		onGroupMemberDecrease(ctx.Event.GroupID, ctx.Event.OperatorID, ctx.Event.UserID, ret)
+	})
+	zero.OnRequest().Handle(func(ctx *zero.Ctx) {
+		ret := func(resp string) {
+			ctx.Send(resp)
+		}
+		onGroupRequest(ctx, ctx.Event.SubType, ctx.Event.GroupID, ctx.Event.UserID, ctx.Event.Comment, ctx.Event.Flag, ret)
+	})
+
+	zero.Run(zero.Config{
+		NickName:      []string{"bot"},
+		CommandPrefix: "/",
+		SuperUsers:    []string{"123456"},
+		Driver: []zero.Driver{
+			driver.NewWebSocketClient(
+				data.Config.ZeroBot.Host,
+				data.Config.ZeroBot.Port,
+				data.Config.ZeroBot.AccessToken,
+			),
+		},
+	})
+	select {}
+	onStop()
+}
 
 func init() {
-	cqp.AppID = "cn.miaoscraft.sis"
-	cqp.Enable = onStart
-	cqp.Disable = onStop
-	cqp.Exit = onStop
-
-	cqp.GroupMsg = onGroupMsg
-	cqp.GroupMemberDecrease = onGroupMemberDecrease
-	cqp.GroupRequest = onGroupRequest
+	//cqp.AppID = "cn.miaoscraft.sis"
 
 	customize.Logger = log.NewLogger("Cstm")
 	whitelist.Logger = log.NewLogger("MyID")
@@ -41,14 +80,10 @@ var Logger = log.NewLogger("Main")
 // 插件生命周期开始
 func onStart() int32 {
 	// 连接数据源
-	err := data.Init(cqp.GetAppDir())
+	err := data.Init(".")
 	if err != nil {
 		Logger.Errorf("初始化数据源失败: %v", err)
 	}
-
-	// 将登录账号载入命令解析器（用于识别@）
-	syntax.CmdPrefix = fmt.Sprintf("[CQ:at,qq=%d]", cqp.GetLoginQQ())
-
 	return 0
 }
 
@@ -62,13 +97,9 @@ func onStop() int32 {
 }
 
 // 群消息事件
-func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, msg string, font int32) int32 {
+func onGroupMsg(fromGroup, fromQQ int64, msg string, ret func(resp string)) int32 {
 	if fromQQ == 80000000 { // 忽略匿名
 		return Ignore
-	}
-
-	ret := func(resp string) {
-		cqp.SendGroupMsg(fromGroup, resp)
 	}
 
 	switch fromGroup {
@@ -84,24 +115,23 @@ func onGroupMsg(subType, msgID int32, fromGroup, fromQQ int64, fromAnonymous, ms
 }
 
 // 群成员减少事件
-func onGroupMemberDecrease(subType, sendTime int32, fromGroup, fromQQ, beingOperateQQ int64) int32 {
+func onGroupMemberDecrease(fromGroup, fromQQ, beingOperateQQ int64, ret func(resp string)) int32 {
 	retValue := Ignore
-	ret := func(resp string) {
-		cqp.SendGroupMsg(fromGroup, resp)
+	ret1 := func(resp string) {
+		ret(resp)
 		retValue = Intercept
 	}
 	// 尝试删白名单
 	if fromGroup == data.Config.GroupID {
-		whitelist.RemoveWhitelist(beingOperateQQ, ret)
+		whitelist.RemoveWhitelist(beingOperateQQ, ret1)
 	}
 	return retValue
 }
 
 // 入群请求事件
-func onGroupRequest(subType, sendTime int32, fromGroup, fromQQ int64, msg, respFlag string) int32 {
+func onGroupRequest(ctx *zero.Ctx, subType string, fromGroup, fromQQ int64, msg, respFlag string, ret func(resp string)) int32 {
 	if !data.Config.DealWithGroupRequest.Enable || // 功能未启用
-		fromGroup != data.Config.GroupID || // 不是要管理的群
-		subType != 1 { // 不是他人要申请入群
+		fromGroup != data.Config.GroupID { // 不是要管理的群 {
 		return Ignore
 	}
 	Logger := log.NewLogger("DwGR")
@@ -118,15 +148,14 @@ func onGroupRequest(subType, sendTime int32, fromGroup, fromQQ int64, msg, respF
 		} else if !ok {
 			Logger.Infof("服务器拒绝%d作为%s入群: %v", fromQQ, name, err)
 			if data.Config.DealWithGroupRequest.CanReject {
-				cqp.SetGroupAddRequest(respFlag, subType, Deny, "")
+				ctx.SetGroupAddRequest(respFlag, subType, Deny, "")
 				return Intercept
 			}
 			return Ignore
 		}
 		Logger.Infof("允许%d作为%s入群", fromQQ, name)
-		cqp.SetGroupAddRequest(respFlag, subType, Allow, "")
+		ctx.SetGroupAddRequest(respFlag, subType, Allow, "")
 
-		ret := func(resp string) { cqp.SendGroupMsg(fromGroup, resp) }
 		whitelist.MyID(fromQQ, name, ret)
 		return Intercept
 	}
@@ -159,6 +188,6 @@ const (
 	Ignore    int32 = 0 //忽略消息
 	Intercept       = 1 //拦截消息
 
-	Allow = 1 // 允许进群
-	Deny  = 2 // 拒绝进群
+	Allow = true  // 允许进群
+	Deny  = false // 拒绝进群
 )
