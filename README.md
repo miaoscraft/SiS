@@ -1,9 +1,7 @@
 # SiS
 [![Build status](https://ci.appveyor.com/api/projects/status/5m4fip2k59kurfcn?svg=true)](https://ci.appveyor.com/project/Tnze/sis)  
-基于酷Q的MC服务器综合管理插件，主要提供白名单管理和状态查询(ping)功能。
-
-本插件已在酷Q社区发布~
-https://cqp.cc/t/44736
+MC服务器综合管理插件，主要提供白名单管理和状态查询(ping)功能。
+支持onebot协议采用正向websocket
 
 用法与配置请查看[Wiki](https://github.com/miaoscraft/SiS/wiki)
 
@@ -24,7 +22,7 @@ https://cqp.cc/t/44736
 
 [Tnze](https://github.com/Tnze)（开发者）  
 [fcc](https://github.com/Amazefcc233)（测试，提示语优化，文案，社区发布，装可爱）  
-[柏喵](https://github.com/MscBaiMeow)（提示语优化，服主）  
+[柏喵](https://github.com/MscBaiMeow)（提示语优化，迁移到simplebot）  
 [Miaoscraft](https://miaoscraft.cn)（感谢相遇）  
 
 ## 依赖
@@ -33,7 +31,8 @@ https://cqp.cc/t/44736
 - Go语言 https://golang.org
 - MC协议文档 https://wiki.vg
 - go-mc库 https://github.com/Tnze/go-mc
-- 酷Q插件SDK https://github.com/Tnze/CoolQ-Golang-SDK
+- SimpleBot机器人 https://github.com/BaiMeow/SimpleBot
+- onebot协议 https://github.com/botuniverse/onebot
 - SQLite驱动 https://github.com/mattn/go-sqlite3
 - MySQL驱动 https://github.com/go-sql-driver/mysql
 - Toml配置文件 https://github.com/BurntSushi/toml

@@ -3,16 +3,15 @@ package customize
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
-
+	"github.com/BaiMeow/SimpleBot/message"
 	"github.com/miaoscraft/SiS/data"
+	"strconv"
 )
 
 // 检查命令是否匹配一个自定义命令，若是的话则丢到RCON执行
 // args长度必须大于0
-func Exec(args []string, fromQQ int64, ret func(string)) bool {
-	cmds, ok := data.Config.Cmd[args[0]]
+func Exec(args message.Msg, fromQQ int64, ret func(string)) bool {
+	cmds, ok := data.Config.Cmd[args[0].(message.Text).Text]
 	if !ok {
 		return false
 	}
@@ -30,7 +29,14 @@ func Exec(args []string, fromQQ int64, ret func(string)) bool {
 
 		rconCmd := cmds.Command
 		if cmds.AllowArgs {
-			rconCmd += " " + strings.Join(args[1:], " ")
+			var argsStr string
+			for _, v := range args[1:] {
+				if v.GetType() != "text" {
+					return false
+				}
+				argsStr += v.(message.Text).Text
+			}
+			rconCmd += " " + argsStr
 		}
 
 		// 执行指令
@@ -52,26 +58,41 @@ func Exec(args []string, fromQQ int64, ret func(string)) bool {
 	}
 }
 
-func Auth(args []string, fromQQ int64, ret func(string)) bool {
+func Auth(args message.Msg, fromQQ int64, ret func(string)) bool {
 	// args: ["auth", "@Member" | "QQ-num", "level"]
-	if len(args) < 2 || args[0] != "auth" {
+	if len(args) < 2 {
 		return false
 	}
 
 	// 解析目标QQ
-	var target int64
-	if _, err := fmt.Sscanf(args[1], "[CQ:at,qq=%d]", &target); err == nil {
-	} else if target, err = strconv.ParseInt(args[1], 10, 64); err == nil {
-	} else {
+	var (
+		id     string
+		target int64
+	)
+	switch args[1].GetType() {
+	case "at":
+		id = args[1].(message.At).ID
+		if id == "all" {
+			return false
+		}
+
+	case "text":
+		id = args[1].(message.Text).Text
+	}
+	target, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		Logger.Waringf("%v", err)
 		return false
 	}
-
 	if len(args) < 3 { // auth查询
 		return getAuth(fromQQ, target, ret)
 	} // auth设置
 
 	// 解析权限等级
-	level, err := strconv.ParseInt(args[2], 10, 64)
+	if args[2].GetType() != "text" {
+		return false
+	}
+	level, err := strconv.ParseInt(args[2].(message.Text).Text, 10, 64)
 	if err != nil {
 		return false
 	}

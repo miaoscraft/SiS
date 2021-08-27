@@ -2,6 +2,7 @@
 package syntax
 
 import (
+	"github.com/BaiMeow/SimpleBot/message"
 	"github.com/miaoscraft/SiS/customize"
 	"github.com/miaoscraft/SiS/ping"
 	"github.com/miaoscraft/SiS/whitelist"
@@ -9,44 +10,62 @@ import (
 	"strings"
 )
 
-var (
-	// 指令前缀，通常为cq码[CQ:at,qq=<机器人qq>]
-	CmdPrefix string
-)
+//ID 登陆qq号，为识别@命令作准备
+var ID int64
 
 var expMyID = regexp.MustCompile(`^\s*(?i)MyID\s*[=＝]\s*([0-9A-Za-z_]{3,16})\s*$`)
 
 // GroupMsg 处理从游戏群接收到的消息，若为合法命令则进行相应的处理。并发安全
 // 返回值指示是否拦截本消息
-func GroupMsg(from int64, msg string, ret func(msg string)) bool {
+func GroupMsg(from int64, msg message.Msg, ret func(msg string)) bool {
 	// 识别MyID指令
-	if match := expMyID.FindStringSubmatch(msg); len(match) == 2 {
-		whitelist.MyID(from, match[1], ret)
-		return true
-	}
-
-	// 识别@指令
-	if strings.HasPrefix(msg, CmdPrefix) {
-		cmd := msg[len(CmdPrefix):]
-		args := strings.Fields(cmd)
-		if len(args) < 1 { // 如果没有首单词则不处理
-			return false
-		}
-
-		switch args[0] {
-		case "ping": // ping指令
-			return ping.Ping(args, ret)
-
-		case "auth": // auth指令
-			return customize.Auth(args, from, ret)
-
-		case "info": // 白名单查询指令
-			return whitelist.Info(args, from, ret)
-
-		default: // 自定义指令
-			return customize.Exec(args, from, ret)
+	if len(msg) == 1 && msg[0].GetType() == "text" {
+		if match := expMyID.FindStringSubmatch(msg[0].(message.Text).Text); len(match) == 2 {
+			whitelist.MyID(from, match[1], ret)
+			return true
 		}
 	}
+	//@命令至少有两个消息段
+	if len(msg) < 2 {
+		return false
+	}
+	at, ok := msg[0].(message.At)
+	if !ok || !at.IsAt(ID) {
+		return false
+	}
+	args := commandField(msg[1:])
+	if args[0].GetType() != "text" {
+		return false
+	}
 
-	return false
+	switch args[0].(message.Text).Text {
+	case "ping": // ping指令
+		return ping.Ping(args, ret)
+
+	case "auth": // auth指令
+		return customize.Auth(args, from, ret)
+
+	case "info": // 白名单查询指令
+		return whitelist.Info(args, from, ret)
+
+	default: // 自定义指令
+		return customize.Exec(args, from, ret)
+	}
+}
+
+//将一个纯文本消息段按照空格划分成多段，保留其他特殊消息类型
+func commandField(msg message.Msg) message.Msg {
+	var newMsg message.Msg
+	for _, unit := range msg {
+		if unit.GetType() != "text" {
+			newMsg = append(newMsg, unit)
+			continue
+		}
+		txt := unit.(message.Text)
+		args := strings.Fields(txt.Text)
+		for _, arg := range args {
+			newMsg = append(newMsg, message.Text{Text: arg})
+		}
+	}
+	return newMsg
 }

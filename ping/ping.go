@@ -5,20 +5,27 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/BaiMeow/SimpleBot/message"
 	"net"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
 
-	"github.com/Tnze/CoolQ-Golang-SDK/cqp/util"
 	"github.com/Tnze/go-mc/bot"
 	"github.com/Tnze/go-mc/chat"
 	"github.com/google/uuid"
 	"github.com/miaoscraft/SiS/data"
 )
 
-func Ping(args []string, ret func(msg string)) bool {
+func Ping(msg message.Msg, ret func(msg string)) bool {
+	var args []string
+	for _, m := range msg {
+		if m.GetType() != "text" {
+			continue
+		}
+		args = append(args, m.(message.Text).Text)
+	}
 	var (
 		resp  []byte
 		delay time.Duration
@@ -109,19 +116,14 @@ type status struct {
 
 var tmp = template.Must(template.
 	New("PingRet").
-	Funcs(CQCodeUtil).
 	Parse(`喵哈喽～{{ $list := .}}
-{{ with index . 0 }}服务器版本: [{{ .Version.Protocol }}] {{ .Version.Name | escape }}
-每日消息: {{ .Description.ClearString | escape }}
-{{ range $index, $elem := $list }}延迟[{{ $index }}]: {{if .Error}}请求失败：{{ .Error }}{{ else }}{{ .Delay }}{{ end }} - {{ .Address }}
+{{ with index . 0 }}服务器版本: [{{ .Version.Protocol }}] {{ .Version.Name }}
+每日消息: {{ .Description.ClearString }}
+{{ range $index, $elem := $list }}延迟: {{if .Error}}请求失败：{{ .Error }}{{ else }}{{ .Delay }}{{ end }}
 {{ end }}在线人数: {{ .Players.Online -}}/{{- .Players.Max }}
 玩家列表:
-{{ range .Players.Sample }}- [{{ .Name | escape }}]
+{{ range .Players.Sample }}- [{{ .Name }}]
 {{ end }}{{ end }}にゃ～`))
-
-var CQCodeUtil = template.FuncMap{
-	"escape": util.Escape,
-}
 
 func render(statuses []status) string {
 	var sb strings.Builder

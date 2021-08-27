@@ -11,11 +11,10 @@ import (
 )
 
 // AppDir 当前插件数据目录
-var AppDir string
+var AppDir = "data"
 
 // Init 初始化插件的数据源，包括读取配置文件、建立数据库连接
-func Init(dir string) error {
-	AppDir = dir
+func Init() error {
 	// 初始化默认文件
 	err := initFiles()
 	if err != nil {
@@ -58,6 +57,11 @@ var Config struct {
 	AdminID int64
 	// 管理员
 	Administrators []int64
+	// onebot连接
+	OneBot struct {
+		Addr  string
+		Token string
+	}
 	// 处理进群请求
 	DealWithGroupRequest struct {
 		Enable    bool

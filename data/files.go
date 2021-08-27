@@ -42,6 +42,10 @@ GroupID = 123456789 # 游戏群群号
 # AdminID = 123456789 # 管理群群号（可选）
 # Administrators = [ 12345678910, 23456789101, 34567891011] # 设置管理员们（他们可以设置任何人的Level)
 
+[Onebot]
+Addr = "localhost:6700"
+token = ""
+
 [DealWithGroupRequest]# 处理入群请求。详细见：https://github.com/miaoscraft/SiS/wiki/%E8%87%AA%E5%8A%A8%E5%A4%84%E7%90%86%E5%85%A5%E7%BE%A4%E8%AF%B7%E6%B1%82
 Enable = true # 启用
 CanReject = false # 是否允许机器人拒绝请求
