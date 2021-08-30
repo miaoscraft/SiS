@@ -3,7 +3,7 @@ module github.com/miaoscraft/SiS
 go 1.16
 
 require (
-	github.com/BaiMeow/SimpleBot v0.0.0-20210827090556-6a405f624fcc
+	github.com/BaiMeow/SimpleBot v0.0.0-20210830052656-219240354d79
 	github.com/BurntSushi/toml v0.3.1
 	github.com/Tnze/go-mc v1.16.5-pre.0.20210228071452-951bedbb131d
 	github.com/go-sql-driver/mysql v1.4.1

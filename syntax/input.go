@@ -7,7 +7,6 @@ import (
 	"github.com/miaoscraft/SiS/ping"
 	"github.com/miaoscraft/SiS/whitelist"
 	"regexp"
-	"strings"
 )
 
 //ID 登陆qq号，为识别@命令作准备
@@ -33,7 +32,7 @@ func GroupMsg(from int64, msg message.Msg, ret func(msg string)) bool {
 	if !ok || !at.IsAt(ID) {
 		return false
 	}
-	args := commandField(msg[1:])
+	args := msg[1:].Fields()
 	if args[0].GetType() != "text" {
 		return false
 	}
@@ -51,21 +50,4 @@ func GroupMsg(from int64, msg message.Msg, ret func(msg string)) bool {
 	default: // 自定义指令
 		return customize.Exec(args, from, ret)
 	}
-}
-
-//将一个纯文本消息段按照空格划分成多段，保留其他特殊消息类型
-func commandField(msg message.Msg) message.Msg {
-	var newMsg message.Msg
-	for _, unit := range msg {
-		if unit.GetType() != "text" {
-			newMsg = append(newMsg, unit)
-			continue
-		}
-		txt := unit.(message.Text)
-		args := strings.Fields(txt.Text)
-		for _, arg := range args {
-			newMsg = append(newMsg, message.Text{Text: arg})
-		}
-	}
-	return newMsg
 }
