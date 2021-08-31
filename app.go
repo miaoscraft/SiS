@@ -62,7 +62,7 @@ func onStop() {
 // 群消息事件
 func onGroupMsg(MsgID int32, fromGroup, fromQQ int64, Msg message.Msg) bool {
 	ret := func(resp string) {
-		b.SendGroupMsg(fromGroup, message.New().Text(resp))
+		b.SendGroupMsg(fromGroup, message.CQstrToArrayMessage(resp).ToMsgStruct())
 	}
 
 	switch fromGroup {
