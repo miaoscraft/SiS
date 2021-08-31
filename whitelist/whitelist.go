@@ -36,26 +36,16 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		return nil
 	}
 
-	onSuccess := func() error {
-		// 添加白名单
-		err = data.AddWhitelist(Name)
-		if err != nil {
-			return fmt.Errorf("添加白名单失败: %v", err)
-		}
-		Logger.Infof("添加白名单%q成功", Name)
-		return nil
-	}
-
 	// 在数据库中记录
-	owner, err := data.SetWhitelist(qq, id, onOldID, onSuccess)
+	owner, err := data.SetWhitelist(qq, id, onOldID)
 	if err != nil {
 		Logger.Errorf("设置白名单失败: %v", err)
 		ret("白名单貌似没有成功加上欸，怎么办ʕ •ᴥ•ʔ")
 		return
 	}
 
-	// 若owner是当前处理的用户则说明绑定成功，否则就是失败
-	if owner != qq {
+	// 若owner不为0说明绑定失败
+	if owner != 0 {
 		if len(Name) < 3 {
 			ret(fmt.Sprintf("白名单%s现在在[CQ:at,qq=%d]手上", Name, owner))
 		} else {
@@ -63,6 +53,13 @@ func MyID(qq int64, name string, ret func(msg string)) {
 		}
 		return
 	}
+	// 添加白名单
+	err = data.AddWhitelist(Name)
+	if err != nil {
+		Logger.Errorf("添加白名单失败: %v", err)
+		return
+	}
+	Logger.Infof("添加白名单%q成功", Name)
 	ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n呐，你的白名单", Name))
 }
 
@@ -96,11 +93,11 @@ func GetUUID(name string) (string, uuid.UUID, error) {
 	var id uuid.UUID
 
 	// 发送请求
-	data, status, err := get("https://api.mojang.com/users/profiles/minecraft/" + name)
+	d, status, err := get("https://api.mojang.com/users/profiles/minecraft/" + name)
 	if err != nil {
 		return "", id, err
 	}
-	defer data.Close()
+	defer d.Close()
 
 	// 检查返回码
 	if status != 200 {
@@ -108,7 +105,7 @@ func GetUUID(name string) (string, uuid.UUID, error) {
 	}
 
 	// 解析json返回值
-	err = json.NewDecoder(data).Decode(&struct {
+	err = json.NewDecoder(d).Decode(&struct {
 		Name *string
 		ID   *uuid.UUID
 	}{&name, &id})
@@ -121,11 +118,11 @@ func GetUUID(name string) (string, uuid.UUID, error) {
 
 // getName 查询玩家的Name
 func getName(UUID uuid.UUID) (string, error) {
-	data, status, err := get("https://sessionserver.mojang.com/session/minecraft/profile/" + hex.EncodeToString(UUID[:]))
+	d, status, err := get("https://sessionserver.mojang.com/session/minecraft/profile/" + hex.EncodeToString(UUID[:]))
 	if err != nil {
 		return "", err
 	}
-	defer data.Close()
+	defer d.Close()
 
 	// 检查返回码
 	if status != 200 {
@@ -134,7 +131,7 @@ func getName(UUID uuid.UUID) (string, error) {
 
 	var resp struct{ Name string }
 	// 解析json返回值
-	err = json.NewDecoder(data).Decode(&resp)
+	err = json.NewDecoder(d).Decode(&resp)
 	if err != nil {
 		return "", err
 	}

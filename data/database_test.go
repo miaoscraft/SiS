@@ -24,10 +24,6 @@ func TestOpenDatabase_sqlite3(t *testing.T) {
 		func(id uuid.UUID) error {
 			t.Log("old id:", id)
 			return nil
-		},
-		func() error {
-			t.Log("success")
-			return nil
 		})
 	t.Log("owner:", owner)
 
@@ -72,5 +68,25 @@ func TestGetLevel(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		t.Log(level)
+	}
+}
+
+func TestUnsetWhitelist(t *testing.T) {
+	err := openDB("sqlite3", "data.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	//defer os.Remove("data.db")
+	defer func() {
+		err := closeDB()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+	if err := UnsetWhitelist(3051467276, func(ID uuid.UUID) error {
+		t.Log(ID)
+		return nil
+	}); err != nil {
+		t.Log(err)
 	}
 }
