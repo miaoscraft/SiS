@@ -18,8 +18,8 @@ type Invited struct {
 }
 
 type User struct {
-	QQ   int64     `gorm:"column:QQ;primary_key"`
-	UUID uuid.UUID `gorm:"column:UUID;not null;unique"`
+	QQ   int64  `gorm:"column:QQ;primary_key"`
+	UUID []byte `gorm:"column:UUID;not null;unique;type:binary(16)"`
 }
 
 type Auth struct {
@@ -87,26 +87,26 @@ func SetWhitelist(QQ int64, ID uuid.UUID, onOldID func(oldID uuid.UUID) error) (
 	if err1 != nil {
 		return 0, err
 	}
-	if qq != QQ {
+	//id有人在使用，直接返回
+	if qq != 0 {
 		return qq, nil
 	}
 
 	var user User
 	// 判断qq号是否存在记录,没有就创建有就更新
 	if gorm.IsRecordNotFoundError(tx.First(&user, QQ).Error) {
-		return 0, tx.Create(&User{QQ: QQ, UUID: ID}).Error
+		return 0, tx.Create(&User{QQ: QQ, UUID: ID[:]}).Error
 	}
-	//uuid没变，不需要更新
-	if user.UUID == ID {
-		return
-	}
-	user.UUID = ID
-	//由于ID字段是唯一的，如果这个ID已经存在就会报错
+	user.UUID = ID[:]
 	if err = tx.Save(&user).Error; err != nil {
 		return
 	}
 	//从mc服务器删除老旧uuid
-	if err1 := onOldID(user.UUID); err1 != nil {
+	var uu uuid.UUID
+	if err := uu.Scan(user.UUID); err != nil {
+		return 0, err
+	}
+	if err1 := onOldID(uu); err1 != nil {
 		return 0, fmt.Errorf("从mc服务器删除白名单失败:%v", err1)
 	}
 	return
@@ -138,8 +138,11 @@ func UnsetWhitelist(QQ int64, onHas func(ID uuid.UUID) error) (err error) {
 	} else if err != nil {
 		return fmt.Errorf("数据库查询UUID失败: %v", err)
 	}
-
-	if err := onHas(user.UUID); err != nil {
+	var uu uuid.UUID
+	if err := uu.Scan(user.UUID); err != nil {
+		return err
+	}
+	if err := onHas(uu); err != nil {
 		return err
 	}
 	//如果主键为空gorm会删掉所有记录，非常危险需要提前检查一下
@@ -154,33 +157,39 @@ func UnsetWhitelist(QQ int64, onHas func(ID uuid.UUID) error) (err error) {
 }
 
 // GetWhitelistByQQ 从数据库读取玩家绑定的ID，若没有绑定ID则返回uuid.Nil
-func GetWhitelistByQQ(QQ int64) (id uuid.UUID, err error) {
+func GetWhitelistByQQ(QQ int64) (uuid.UUID, error) {
 	var user User
-	err = db.Where("QQ=?", QQ).First(&user).Error
-	if err == gorm.ErrRecordNotFound {
+	err := db.Where("QQ=?", QQ).First(&user).Error
+	if gorm.IsRecordNotFoundError(err) {
 		return uuid.Nil, nil
 	}
 	if err != nil {
 		return uuid.Nil, err
 	}
-	id = user.UUID
-	return
+	var uu uuid.UUID
+	if err := uu.Scan(user.UUID); err != nil {
+		return uuid.Nil, err
+	}
+	return uu, nil
 }
 
 // GetWhitelistByUUID 从数据库读取绑定ID的玩家，若ID没有被绑定则则返回0
-func GetWhitelistByUUID(ID uuid.UUID) (qq int64, err error) {
+func GetWhitelistByUUID(ID uuid.UUID) (int64, error) {
 	var user User
-	if gorm.IsRecordNotFoundError(db.Where("UUID=?", ID).First(&user).Error) {
-		return qq, nil
+	err := db.Where("UUID=?", ID[:]).First(&user).Error
+	if gorm.IsRecordNotFoundError(err) {
+		return 0, nil
 	}
-	qq = user.QQ
-	return
+	if err != nil {
+		return 0, err
+	}
+	return user.QQ, nil
 }
 
 // GetLevel 获取某人的权限等级
 func GetLevel(QQ int64) (level int64, err error) {
 	var auth Auth
-	err = db.Where("qq=?", QQ).First(&auth).Error
+	err = db.Where("QQ=?", QQ).First(&auth).Error
 	if err == gorm.ErrRecordNotFound {
 		level = 0
 		err = nil

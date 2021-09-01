@@ -46,6 +46,12 @@ func MyID(qq int64, name string, ret func(msg string)) {
 
 	// 若owner不为0说明绑定失败
 	if owner != 0 {
+		//自己已经占用了
+		if owner == qq {
+			ret(fmt.Sprintf("{\\__/}\n( • . •)\n/ >%s\n呐，你的白名单", Name))
+			return
+		}
+		//被别人占用
 		if len(Name) < 3 {
 			ret(fmt.Sprintf("白名单%s现在在[CQ:at,qq=%d]手上", Name, owner))
 		} else {
