@@ -63,6 +63,11 @@ func MyID(qq int64, name string, ret func(msg string)) {
 	err = data.AddWhitelist(Name)
 	if err != nil {
 		Logger.Errorf("添加白名单失败: %v", err)
+		ret(fmt.Sprintf("添加白名单失败: %v", err))
+		if err := data.UnsetWhitelist(qq, func(_ uuid.UUID) error { return nil }); err != nil {
+			Logger.Errorf("从数据库删除记录失败: %v", err)
+			ret(fmt.Sprintf("从数据库删除记录失败: %v", err))
+		}
 		return
 	}
 	Logger.Infof("添加白名单%q成功", Name)

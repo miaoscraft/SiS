@@ -1,5 +1,5 @@
-github.com/BaiMeow/SimpleBot v0.0.0-20210905234235-9617f948abcb h1:eeHVaN20rRxlbSXvTGa0WiV2U2azUd4falNA4R5P6Uk=
-github.com/BaiMeow/SimpleBot v0.0.0-20210905234235-9617f948abcb/go.mod h1:BtnE+YJUca3TyMHt7xfzFhfKZWNZsdcvkKyI3txwI2U=
+github.com/BaiMeow/SimpleBot v0.0.0-20210907063331-5692ca151a00 h1:g0i+kZu+Hlydujmnhg2NA5Q6/qbay0n8oGO4Vg69Q0M=
+github.com/BaiMeow/SimpleBot v0.0.0-20210907063331-5692ca151a00/go.mod h1:BtnE+YJUca3TyMHt7xfzFhfKZWNZsdcvkKyI3txwI2U=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
