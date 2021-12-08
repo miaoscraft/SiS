@@ -87,7 +87,7 @@ func RemoveWhitelist(qq int64, ret func(msg string)) {
 		}
 
 		Logger.Infof("删除白名单%q成功", name)
-		ret(name + "，你白名单(号)没了")
+		ret(name + "删除白名单成功")
 		return nil
 	}
 	// 删除数据库中的数据
