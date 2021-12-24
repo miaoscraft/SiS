@@ -33,7 +33,7 @@ func GroupMsg(from int64, msg message.Msg, ret func(msg string)) bool {
 		return false
 	}
 	args := msg[1:].Fields()
-	if args[0].GetType() != "text" {
+	if len(args) == 0 || args[0].GetType() != "text" {
 		return false
 	}
 
