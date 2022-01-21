@@ -97,17 +97,17 @@ func SetWhitelist(QQ int64, ID uuid.UUID, onOldID func(oldID uuid.UUID) error) (
 	if gorm.IsRecordNotFoundError(tx.First(&user, QQ).Error) {
 		return 0, tx.Create(&User{QQ: QQ, UUID: ID[:]}).Error
 	}
-	user.UUID = ID[:]
-	if err = tx.Save(&user).Error; err != nil {
-		return
-	}
 	//从mc服务器删除老旧uuid
 	var uu uuid.UUID
 	if err := uu.Scan(user.UUID); err != nil {
-		return 0, err
+		return 0, fmt.Errorf("数据库错误，无法从游戏服务器删除旧的uuid:%v", err)
 	}
 	if err1 := onOldID(uu); err1 != nil {
 		return 0, fmt.Errorf("从mc服务器删除白名单失败:%v", err1)
+	}
+	user.UUID = ID[:]
+	if err = tx.Save(&user).Error; err != nil {
+		return 0, fmt.Errorf("将白名单保存到游戏服务器后更新数据库错误：%v", err)
 	}
 	return
 }
