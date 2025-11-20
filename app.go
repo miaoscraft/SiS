@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"net/url"
+	"regexp"
+
 	"github.com/BaiMeow/SimpleBot/bot"
 	"github.com/BaiMeow/SimpleBot/driver"
 	"github.com/BaiMeow/SimpleBot/message"
@@ -11,9 +15,6 @@ import (
 	"github.com/miaoscraft/SiS/log"
 	"github.com/miaoscraft/SiS/syntax"
 	"github.com/miaoscraft/SiS/whitelist"
-	"net/http"
-	"net/url"
-	"regexp"
 )
 
 var b *bot.Bot
@@ -42,7 +43,10 @@ func main() {
 		Priority: 1,
 		F:        onGroupMemberDecrease,
 	})
-	b.Run()
+	err = b.Run()
+	if err != nil {
+		Logger.Error(err.Error())
+	}
 	// 将登录账号载入命令解析器（用于识别@）
 	syntax.ID = b.GetID()
 	defer onStop()
